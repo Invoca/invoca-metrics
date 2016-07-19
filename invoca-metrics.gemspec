@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rails", "~> 3.2"
   spec.add_dependency "activesupport", "~> 3.2"
   spec.add_dependency "statsd-ruby", "~> 1.2.1"
-  spec.add_dependency "keen", "~> 0.8.4"
+  spec.add_dependency "keen", "~> 0.9.5"
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
