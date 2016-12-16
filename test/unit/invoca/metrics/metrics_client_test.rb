@@ -209,6 +209,13 @@ describe Invoca::Metrics::Client do
         @metrics_client.transmit("Something bad happened.", { :custom_data => "12:00pm" })
       end
     end
+
+    context "Statsd Extension" do
+      should "connect the socket so we don't do extra DNS queries" do
+        socket = @metrics_client.send(:socket)
+        socket.send("test message", 0) # Will fail with destination address required if not connected
+      end
+    end
   end
 
 end
