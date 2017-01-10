@@ -215,6 +215,35 @@ describe Invoca::Metrics::Client do
         socket = @metrics_client.send(:socket)
         socket.send("test message", 0) # Will fail with destination address required if not connected
       end
+
+      should "use a bound udp socket to connect to statsd" do
+        begin
+          addr = @metrics_client.send(:socket).remote_address
+          assert_equal '127.0.0.1', addr.ip_address
+          assert_equal 8125, addr.ip_port
+        rescue Errno::ENOTCONN => bad
+        end
+        assert_nil bad, "Socket should have been connected"
+      end
+
+     should "use a new socket per Thread" do
+        main_socket = @metrics_client.send(:socket)
+        new_thread = Thread.new do
+          thread_socket = @metrics_client.send(:socket)
+          assert main_socket.fileno != thread_socket.fileno
+        end
+        new_thread.join
+      end
+
+      should "not use a new socket per Fiber" do
+        main_socket = @metrics_client.send(:socket)
+        new_fiber = Fiber.new do
+          fiber_socket = @metrics_client.send(:socket)
+          Fiber.yield main_socket.fileno == fiber_socket.fileno
+        end
+        result = new_fiber.resume
+        assert result, "The file numbers should be equal"
+      end
     end
   end
 
