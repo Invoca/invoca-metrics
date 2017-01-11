@@ -4,11 +4,12 @@ require File.expand_path('../../../../helpers/metrics/metrics_test_helpers', __F
 describe Invoca::Metrics::Client do
 
   include MetricsTestHelpers
-  if ::Rails.const_defined?(:Dom)
-    include ::Rails::Dom::Testing::Assertions::SelectorAssertions
-  else
-    include ActionDispatch::Assertions::SelectorAssertions
-  end
+  # if ::Rails.const_defined?(:Dom)
+  #   include ::Rails::Dom::Testing::Assertions::SelectorAssertions
+  # else
+  #   include ActionDispatch::Assertions::SelectorAssertions
+  # end
+  include ::Rails::Dom::Testing::Assertions::SelectorAssertions
 
   context "initialization" do
     setup do
