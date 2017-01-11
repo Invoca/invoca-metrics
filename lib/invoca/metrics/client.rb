@@ -112,9 +112,12 @@ module Invoca
     private
 
       def socket
-        Thread.current[:statsd_socket] ||= UDPSocket.new.tap { |udp| udp.connect(@host, @port) }
+        Thread.current.thread_variable_get(:statsd_socket) || Thread.current.thread_variable_set(:statsd_socket, new_socket)
       end
 
+      def new_socket
+        UDPSocket.new.tap { |udp| udp.connect(@host, @port) }
+      end
     end
   end
 end
