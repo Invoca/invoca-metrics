@@ -4,11 +4,7 @@ require File.expand_path('../../../../helpers/metrics/metrics_test_helpers', __F
 describe Invoca::Metrics::Source do
 
   include MetricsTestHelpers
-  if ::Rails.const_defined?(:Dom)
-    include ::Rails::Dom::Testing::Assertions::SelectorAssertions
-  else
-    include ActionDispatch::Assertions::SelectorAssertions
-  end
+  include ::Rails::Dom::Testing::Assertions::SelectorAssertions
 
   # use this class to test the Metrics functionality as a mixed-in module
   # the idea is that it mixes in and uses the Metrics module just like any other class would
