@@ -77,7 +77,8 @@ module Invoca
         start = Time.now
         result = yield
         length_of_time = ((Time.now - start) * MILLISECONDS_IN_SECOND).round
-        timing(stat, length_of_time, sample_rate)
+        name_and_type = [stat, "timer", @server_name].join(STATSD_METRICS_SEPARATOR)
+        timing(name_and_type, length_of_time, sample_rate)
         [result, length_of_time]
       end
 
