@@ -12,7 +12,7 @@ module Invoca
   module Metrics
 
     class << self
-      attr_accessor :service_name, :server_name, :sub_server_name, :cluster_name
+      attr_accessor :service_name, :server_name, :sub_server_name, :cluster_name, :statsd_host, :statsd_port
 
       def service_name
         if @service_name.nil?
