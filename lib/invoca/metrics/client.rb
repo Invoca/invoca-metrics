@@ -84,7 +84,7 @@ module Invoca
       class << self
 
         def metrics
-          new(Client::STATSD_DEFAULT_HOSTNAME, Client::STATSD_DEFAULT_PORT, Invoca::Metrics.cluster_name, Invoca::Metrics.service_name, Invoca::Metrics.server_name, Invoca::Metrics.sub_server_name)
+          new(Invoca::Metrics.statsd_host || Client::STATSD_DEFAULT_HOSTNAME, Invoca::Metrics.statsd_port || Client::STATSD_DEFAULT_PORT, Invoca::Metrics.cluster_name, Invoca::Metrics.service_name, Invoca::Metrics.server_name, Invoca::Metrics.sub_server_name)
         end
 
       end

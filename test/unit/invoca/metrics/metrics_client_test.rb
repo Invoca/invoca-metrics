@@ -30,6 +30,14 @@ describe Invoca::Metrics::Client do
       assert_equal Invoca::Metrics::Client::STATSD_DEFAULT_PORT, metrics_client.port
       assert_equal "unicorn", metrics_client.namespace
     end
+
+    should "properly construct with configured statsd connection information" do
+      Invoca::Metrics.statsd_host = "127.0.0.10"
+      Invoca::Metrics.statsd_port = 1234
+      metrics_client = Invoca::Metrics::Client.metrics
+      assert_equal "127.0.0.10", metrics_client.hostname
+      assert_equal 1234,         metrics_client.port
+    end
   end
 
   context "reporting to statsd" do
