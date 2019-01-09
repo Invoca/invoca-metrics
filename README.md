@@ -29,6 +29,17 @@ Add the following code to your application...
 
 Out of the four settings above, only `service_name` is required.  The others are optional.
 
+### server_name vs server_group
+
+The default `:server_identifier` is `:server_name`. Set `server_identifier` as `:server_group` in order to defer to using a more generic label than the supplied `server_name`
+
+Note: `sub_server_name` and `cluster_name` are not affected
+
+    Invoca::Metrics.server_group             = "my_group"
+    Invoca::Metrics.server_identifier        = :server_group
+    Invoca::Metrics.server_group_statsd_host = "127.0.0.1"
+    Invoca::Metrics.server_group_statsd_port = 1
+
 ## Usage
 
 Mixin the Source module:
