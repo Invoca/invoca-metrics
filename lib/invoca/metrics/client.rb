@@ -17,7 +17,7 @@ module Invoca
         @port            = port
         @cluster_name    = cluster_name
         @service_name    = service_name
-        @server_label    =  server_label
+        @server_label    = server_label
         @sub_server_name = sub_server_name
 
         super(@hostname, @port)
