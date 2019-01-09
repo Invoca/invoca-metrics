@@ -9,6 +9,8 @@ require 'shoulda'
 
 require 'invoca/metrics'
 
+ActiveSupport.test_order = :random
+
 class Time
   cattr_reader :now_override
 
