@@ -24,6 +24,10 @@ module Invoca
         self.namespace = [@cluster_name, @service_name].compact.join(STATSD_METRICS_SEPARATOR).presence
       end
 
+      def server_name # For backwards compatibility
+        server_label
+      end
+
       def gauge(name, value)
         if args = metric_args(name, value, "gauge")
           super(*args)

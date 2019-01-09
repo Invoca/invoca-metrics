@@ -40,6 +40,15 @@ describe Invoca::Metrics::Client do
     end
   end
 
+  context "#server_name" do
+    should "return server_label for backwards compatibility" do
+      stub_metrics_as_production_unicorn
+      metrics_client = Invoca::Metrics::Client.metrics
+      assert_equal metrics_client.server_name, metrics_client.server_label
+      assert_equal "prod-fe1", metrics_client.server_name
+    end
+  end
+
   context "reporting to statsd" do
 
     context "in the production environment" do
