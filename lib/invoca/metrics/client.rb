@@ -9,15 +9,15 @@ module Invoca
 
       MILLISECONDS_IN_SECOND = 1000
 
-      attr_reader :hostname, :port, :statsd_prefix, :server_name, :sub_server_name
+      attr_reader :hostname, :port, :statsd_prefix, :server_label, :sub_server_name
 
-      def initialize(hostname, port, cluster_name, service_name, server_name, sub_server_name)
+      def initialize(hostname, port, cluster_name, service_name, server_label, sub_server_name)
 
-        @hostname = hostname
-        @port = port
-        @cluster_name = cluster_name
-        @service_name = service_name
-        @server_name =  server_name
+        @hostname        = hostname
+        @port            = port
+        @cluster_name    = cluster_name
+        @service_name    = service_name
+        @server_label    =  server_label
         @sub_server_name = sub_server_name
 
         super(@hostname, @port)
@@ -55,7 +55,7 @@ module Invoca
       def timer(name, milliseconds = nil, &block)
         name.present? or raise ArgumentError, "Must specify a metric name."
         (!milliseconds.nil? ^ block_given?) or raise ArgumentError, "Must pass exactly one of milliseconds or block."
-        name_and_type = [name, "timer", @server_name].join(STATSD_METRICS_SEPARATOR)
+        name_and_type = [name, "timer", @server_label].join(STATSD_METRICS_SEPARATOR)
 
         if milliseconds.nil?
           result, block_time = time(name_and_type, &block)
@@ -82,18 +82,21 @@ module Invoca
       end
 
       class << self
-
         def metrics
-          new(Invoca::Metrics.statsd_host || Client::STATSD_DEFAULT_HOSTNAME, Invoca::Metrics.statsd_port || Client::STATSD_DEFAULT_PORT, Invoca::Metrics.cluster_name, Invoca::Metrics.service_name, Invoca::Metrics.server_name, Invoca::Metrics.sub_server_name)
+          new(Invoca::Metrics.host || Client::STATSD_DEFAULT_HOSTNAME,
+              Invoca::Metrics.port || Client::STATSD_DEFAULT_PORT,
+              Invoca::Metrics.cluster_name,
+              Invoca::Metrics.service_name,
+              Invoca::Metrics.server_label,
+              Invoca::Metrics.sub_server_name)
         end
-
       end
 
     protected
 
       def metric_args(name, value, stat_type)
         name.present? or raise ArgumentError, "Must specify a metric name."
-        extended_name = [name, stat_type, @server_name, @sub_server_name].compact.join(STATSD_METRICS_SEPARATOR)
+        extended_name = [name, stat_type, @server_label, @sub_server_name].compact.join(STATSD_METRICS_SEPARATOR)
         if value
           [extended_name, value]
         else

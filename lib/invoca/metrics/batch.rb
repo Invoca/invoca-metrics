@@ -5,12 +5,12 @@ module Invoca
 
       # @param [Statsd] requires a configured Client instance
       def initialize(client)
-        @client = client
-        @server_name = @client.server_name
+        @client          = client
+        @server_label    = @client.server_label
         @sub_server_name = @client.sub_server_name
-        @batch_size = @client.batch_size
-        self.namespace = @client.namespace
-        @backlog = []
+        @batch_size      = @client.batch_size
+        self.namespace   = @client.namespace
+        @backlog         = []
       end
 
       # @yields [Batch] yields itself
