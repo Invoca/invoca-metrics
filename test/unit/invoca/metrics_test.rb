@@ -8,68 +8,42 @@ describe Invoca::Metrics do
     assert_raises(ArgumentError) { Invoca::Metrics.service_name }
   end
 
-  context "ClassMethods" do
+  context ".config" do
+    should "return empty hash if not set" do
+      Invoca::Metrics.config = nil
+      assert_equal({}, Invoca::Metrics.config)
+    end
+  end
+
+  context ".default_client_config" do
     setup do
-      stub_metrics(service_name:             "my_service",
-                   server_identifier:        :server_name,
-                   server_name:              "my_server",
-                   statsd_host:              "127.0.0.1",
-                   statsd_port:              1,
-                   server_group:             "my_group",
-                   server_group_statsd_host: "127.0.0.2",
-                   server_group_statsd_port: 2,
-                   sub_server_name:          "my_sub_server")
+      @default_values = {
+        service_name:    "dummy_service",
+        server_name:     "dummy_name",
+        cluster_name:    "dummy_cluster",
+        statsd_host:     "127.0.0.1",
+        statsd_port:     1,
+        sub_server_name: "dummy_sub_server"
+      }
     end
 
-    context ".host" do
-      should "return statsd_host when server_identifier is :server_name" do
-        Invoca::Metrics.server_identifier = :server_name
-        assert_equal "127.0.0.1", Invoca::Metrics.host
-      end
-
-      should "return server_group_statsd_host when server_identifier is :server_group" do
-        Invoca::Metrics.server_identifier = :server_group
-        assert_equal "127.0.0.2", Invoca::Metrics.host
-      end
-
-      should "return nil when server_identifier doesn't have a match" do
-        Invoca::Metrics.server_identifier = :other
-        assert_nil Invoca::Metrics.host
-      end
+    should "return default config values when no default identifier is set" do
+      stub_metrics(@default_values)
+      assert_equal @default_values, Invoca::Metrics.default_client_config
     end
 
-    context ".port" do
-      should "return statsd_port when server_identifier is :server_name" do
-        Invoca::Metrics.server_identifier = :server_name
-        assert_equal 1, Invoca::Metrics.port
-      end
-
-      should "return server_group_statsd_port when server_identifier is :server_group" do
-        Invoca::Metrics.server_identifier = :server_group
-        assert_equal 2, Invoca::Metrics.port
-      end
-
-      should "return nil when server_identifier doesn't have a match" do
-        Invoca::Metrics.server_identifier = :other
-        assert_nil Invoca::Metrics.port
-      end
-    end
-
-    context ".server_label" do
-      should "return server_name when server_identifier is :server_name" do
-        Invoca::Metrics.server_identifier = :server_name
-        assert_equal "my_server", Invoca::Metrics.server_label
-      end
-
-      should "return server_group when server_identifier is :server_group" do
-        Invoca::Metrics.server_identifier = :server_group
-        assert_equal "my_group", Invoca::Metrics.server_label
-      end
-
-      should "return nil when server_identifier doesn't have a match" do
-        Invoca::Metrics.server_identifier = :other
-        assert_nil Invoca::Metrics.server_label
-      end
+    should "return default config values merged with default identifier config" do
+      stub_metrics(@default_values)
+      Invoca::Metrics.config = {
+        deployment_group: {
+          server_name: "primary",
+          statsd_host: "127.0.0.100",
+          statsd_port: 80,
+        }
+      }
+      Invoca::Metrics.default_identifier = :deployment_group
+      expected_client_config = @default_values.merge(server_name: "primary", statsd_host: "127.0.0.100", statsd_port: 80)
+      assert_equal expected_client_config, Invoca::Metrics.default_client_config
     end
   end
 end

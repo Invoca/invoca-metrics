@@ -13,7 +13,8 @@ describe Invoca::Metrics::Source do
 
     class << self
       def clear_metrics
-        @metrics = nil
+        @metrics     = nil
+        @metrics_for = nil
       end
     end
 

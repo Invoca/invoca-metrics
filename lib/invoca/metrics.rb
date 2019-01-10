@@ -13,32 +13,28 @@ module Invoca
     @server_identifier = :server_name
 
     class << self
-      attr_accessor :service_name, :server_name, :server_group, :sub_server_name, :cluster_name, :server_identifier,
-                    :statsd_host, :statsd_port, :server_group_statsd_host, :server_group_statsd_port
+      attr_accessor :service_name, :server_name, :sub_server_name, :cluster_name, :statsd_host, :statsd_port
+
+      attr_accessor :default_identifier
+      attr_writer   :config
 
       def service_name
-        if @service_name.nil?
-          raise ArgumentError, "You must assign a value to Invoca::Metrics.service_name"
-        end
-        @service_name
+        @service_name or raise ArgumentError, "You must assign a value to Invoca::Metrics.service_name"
       end
 
-      def host
-        values_by_server_identifier(statsd_host, server_group_statsd_host)[server_identifier]
+      def config
+        @config ||= {}
       end
 
-      def port
-        values_by_server_identifier(statsd_port, server_group_statsd_port)[server_identifier]
-      end
-
-      def server_label
-        values_by_server_identifier(server_name, server_group)[server_identifier]
-      end
-
-      private
-
-      def values_by_server_identifier(server_name_value, server_group_value)
-        { server_name: server_name_value, server_group: server_group_value }
+      def default_client_config
+        {
+          service_name:    Invoca::Metrics.service_name,
+          server_name:     Invoca::Metrics.server_name,
+          cluster_name:    Invoca::Metrics.cluster_name,
+          statsd_host:     Invoca::Metrics.statsd_host,
+          statsd_port:     Invoca::Metrics.statsd_port,
+          sub_server_name: Invoca::Metrics.sub_server_name
+        }.merge(config[default_identifier] || {})
       end
     end
 
@@ -49,14 +45,26 @@ module Invoca
 
       module ClassMethods
         def metrics
-          @metrics ||= Client.metrics
+          @metrics ||= metrics_for(identifier: Invoca::Metrics.default_identifier)
+        end
+
+        def metrics_for(identifier:)
+          @metrics_for ||= {}
+          @metrics_for[identifier] ||=
+            begin
+              identifier_metrics_config = Invoca::Metrics.config[identifier] || {}
+              Client.metrics(Invoca::Metrics.default_client_config.merge(identifier_metrics_config))
+            end
         end
       end
 
       def metrics
         self.class.metrics
       end
-    end
 
+      def metrics_for(identifier:)
+        self.class.metrics_for(identifier: identifier)
+      end
+    end
   end
 end
