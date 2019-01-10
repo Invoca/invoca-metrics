@@ -13,7 +13,7 @@ module Invoca
     CONFIG_FIELDS = [:service_name, :server_name, :sub_server_name, :cluster_name, :statsd_host, :statsd_port].freeze
 
     class << self
-      attr_accessor *CONFIG_FIELDS, :default_config_key
+      attr_accessor(*CONFIG_FIELDS, :default_config_key)
 
       def service_name
         @service_name or raise ArgumentError, "You must assign a value to Invoca::Metrics.service_name"
