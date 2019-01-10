@@ -13,6 +13,22 @@ describe Invoca::Metrics do
       Invoca::Metrics.config = nil
       assert_equal({}, Invoca::Metrics.config)
     end
+
+    should "raise an argument error if a config is given with an invalid key" do
+      expected_allowed_keys = [:service_name, :server_name, :sub_server_name, :cluster_name, :statsd_host, :statsd_port]
+      assert_raises(ArgumentError, /Invalid config.*Allowed fields for config key: #{expected_allowed_keys}/) do
+        Invoca::Metrics.config = {
+          deployment_group: {
+            service_name: "Valid deployment group service name key",
+            server_name: "Valid deployment group server name key"
+          },
+          region: {
+            service_name: "Valid region service name key",
+            invalid_key: "Invalid region key"
+          }
+        }
+      end
+    end
   end
 
   context ".default_client_config" do
