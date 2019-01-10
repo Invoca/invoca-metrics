@@ -10,12 +10,10 @@ require "invoca/metrics/batch"
 
 module Invoca
   module Metrics
-    @server_identifier = :server_name
-
     class << self
       attr_accessor :service_name, :server_name, :sub_server_name, :cluster_name, :statsd_host, :statsd_port
 
-      attr_accessor :default_identifier
+      attr_accessor :default_config_key
       attr_writer   :config
 
       def service_name
@@ -34,7 +32,7 @@ module Invoca
           statsd_host:     Invoca::Metrics.statsd_host,
           statsd_port:     Invoca::Metrics.statsd_port,
           sub_server_name: Invoca::Metrics.sub_server_name
-        }.merge(config[default_identifier] || {})
+        }.merge(config[default_config_key] || {})
       end
     end
 
@@ -45,15 +43,15 @@ module Invoca
 
       module ClassMethods
         def metrics
-          @metrics ||= metrics_for(identifier: Invoca::Metrics.default_identifier)
+          @metrics ||= metrics_for(config_key: Invoca::Metrics.default_config_key)
         end
 
-        def metrics_for(identifier:)
+        def metrics_for(config_key:)
           @metrics_for ||= {}
-          @metrics_for[identifier] ||=
+          @metrics_for[config_key] ||=
             begin
-              identifier_metrics_config = Invoca::Metrics.config[identifier] || {}
-              Client.metrics(Invoca::Metrics.default_client_config.merge(identifier_metrics_config))
+              metrics_config = Invoca::Metrics.config[config_key] || {}
+              Client.metrics(Invoca::Metrics.default_client_config.merge(metrics_config))
             end
         end
       end
@@ -62,8 +60,8 @@ module Invoca
         self.class.metrics
       end
 
-      def metrics_for(identifier:)
-        self.class.metrics_for(identifier: identifier)
+      def metrics_for(config_key:)
+        self.class.metrics_for(config_key: config_key)
       end
     end
   end

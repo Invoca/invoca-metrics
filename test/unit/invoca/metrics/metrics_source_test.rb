@@ -71,11 +71,11 @@ describe Invoca::Metrics::Source do
             statsd_host: "255.0.0.456"
           }
         }
-        Invoca::Metrics.default_identifier = :deploy_group
+        Invoca::Metrics.default_config_key = :deploy_group
       end
 
       context "#metrics" do
-        should "return metrics client for default identifier" do
+        should "return metrics client for default_config_key" do
           metrics_client = @metric_tester.metrics
           assert_equal "default_sub_server_name", metrics_client.sub_server_name
           assert_equal "255.0.0.123", metrics_client.hostname
@@ -83,8 +83,8 @@ describe Invoca::Metrics::Source do
       end
 
       context "#metrics_for" do
-        should "return metrics client for given identifier" do
-          metrics_client = @metric_tester.metrics_for(identifier: :region)
+        should "return metrics client for given config_key" do
+          metrics_client = @metric_tester.metrics_for(config_key: :region)
           assert_equal "default_sub_server_name", metrics_client.sub_server_name
           assert_equal "255.0.0.456", metrics_client.hostname
         end

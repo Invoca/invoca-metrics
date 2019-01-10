@@ -52,14 +52,14 @@ In order to configure multiple configurations, supply a `config` hash with addit
       }
     }
 
-The settings (`[service_name, server_name, cluster_name, sub_server_name, statsd_host, statsd_port]`) directly set on Invoca::Metrics will be the default values supplied if the individual identifier config does not supply the option.
+The settings (`[service_name, server_name, cluster_name, sub_server_name, statsd_host, statsd_port]`) directly set on `Invoca::Metrics` will be the default values supplied if the individual configuration does not supply the option.
 It's highly suggested that each configuration has its own `statsd_host` and `statsd_port` along with unique naming since writing the same metric from one statsd node could be overwritten by the same metric from a separate node.
 
-In order to set a configuration as the default, set the configuration key as `default_identifier`.
+In order to set a configuration as the default, set the configuration key as `default_config_key`.
 
-    Invoca::Metrics.default_identifier = :deployment_group
+    Invoca::Metrics.default_config_key = :deployment_group
 
-Any keys missing from the `default_identifier` config will by default have the values from the keys set directly on `Invoca::Metrics`.
+Any keys missing from the `default_config_key` config will by default have the values from the keys set directly on `Invoca::Metrics`.
 
 The full set of default values for the above example would then be
 
@@ -84,9 +84,9 @@ Then call any method from `Invoca::Metrics::Client` via the `metrics` member (th
 
     metrics.timer("some_process/execution_time", time_in_ms)
 
-You can also request a specific config identifier by calling `metrics_for(identifier: identifier_key)`
+You can also request a specific configuration by calling `metrics_for(config_key: configuration_key)`
 
-    metrics_for(identifier: :region).count("region_upload.success")
+    metrics_for(config_key: :region).count("region_upload.success")
 
 Additional examples of using the gem can be found in the file: test/integration/metrics_gem_tester.rb
 

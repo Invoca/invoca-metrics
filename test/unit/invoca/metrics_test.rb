@@ -27,12 +27,13 @@ describe Invoca::Metrics do
       }
     end
 
-    should "return default config values when no default identifier is set" do
+    should "return default config values when no default_config_key is set" do
       stub_metrics(@default_values)
+      assert_nil Invoca::Metrics.default_config_key
       assert_equal @default_values, Invoca::Metrics.default_client_config
     end
 
-    should "return default config values merged with default identifier config" do
+    should "return class default values merged with default_config_key config" do
       stub_metrics(@default_values)
       Invoca::Metrics.config = {
         deployment_group: {
@@ -41,7 +42,7 @@ describe Invoca::Metrics do
           statsd_port: 80,
         }
       }
-      Invoca::Metrics.default_identifier = :deployment_group
+      Invoca::Metrics.default_config_key = :deployment_group
       expected_client_config = @default_values.merge(server_name: "primary", statsd_host: "127.0.0.100", statsd_port: 80)
       assert_equal expected_client_config, Invoca::Metrics.default_client_config
     end

@@ -18,7 +18,7 @@ module MetricsTestHelpers
                    statsd_port:        nil,
                    sub_server_name:    nil,
                    config:             nil,
-                   default_identifier: nil)
+                   default_config_key: nil)
     Invoca::Metrics.server_name        = server_name
     Invoca::Metrics.cluster_name       = cluster_name
     Invoca::Metrics.service_name       = service_name
@@ -26,7 +26,7 @@ module MetricsTestHelpers
     Invoca::Metrics.statsd_port        = statsd_port
     Invoca::Metrics.sub_server_name    = sub_server_name
     Invoca::Metrics.config             = config
-    Invoca::Metrics.default_identifier = default_identifier
+    Invoca::Metrics.default_config_key = default_config_key
   end
 
   def metrics_client_with_message_tracking
