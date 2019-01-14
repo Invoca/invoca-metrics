@@ -92,8 +92,7 @@ module Invoca
                     cluster_name:    Invoca::Metrics.cluster_name,
                     service_name:    Invoca::Metrics.service_name,
                     server_name:     Invoca::Metrics.server_name,
-                    sub_server_name: Invoca::Metrics.sub_server_name,
-                    **_params)
+                    sub_server_name: Invoca::Metrics.sub_server_name)
           new(statsd_host || Client::STATSD_DEFAULT_HOSTNAME,
               statsd_port || Client::STATSD_DEFAULT_PORT,
               cluster_name,
