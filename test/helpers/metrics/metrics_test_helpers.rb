@@ -4,17 +4,29 @@ module MetricsTestHelpers
   include TrackSentMessage
 
   def stub_metrics_as_production_unicorn
-    stub_metrics("prod-fe1", nil, "unicorn")
+    stub_metrics(server_name: "prod-fe1", cluster_name: nil, service_name: "unicorn")
   end
 
   def stub_metrics_as_staging_unicorn
-    stub_metrics("staging-full-fe1", "staging", "unicorn")
+    stub_metrics(server_name: "staging-full-fe1", cluster_name: "staging", service_name: "unicorn")
   end
 
-  def stub_metrics(server_name, cluster_name, service_name)
-    Invoca::Metrics.server_name = server_name
-    Invoca::Metrics.cluster_name = cluster_name
-    Invoca::Metrics.service_name = service_name
+  def stub_metrics(service_name:       nil,
+                   server_name:        nil,
+                   cluster_name:       nil,
+                   statsd_host:        nil,
+                   statsd_port:        nil,
+                   sub_server_name:    nil,
+                   config:             nil,
+                   default_config_key: nil)
+    Invoca::Metrics.server_name        = server_name
+    Invoca::Metrics.cluster_name       = cluster_name
+    Invoca::Metrics.service_name       = service_name
+    Invoca::Metrics.statsd_host        = statsd_host
+    Invoca::Metrics.statsd_port        = statsd_port
+    Invoca::Metrics.sub_server_name    = sub_server_name
+    Invoca::Metrics.config             = config
+    Invoca::Metrics.default_config_key = default_config_key
   end
 
   def metrics_client_with_message_tracking

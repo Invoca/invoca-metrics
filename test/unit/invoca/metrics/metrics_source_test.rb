@@ -13,7 +13,8 @@ describe Invoca::Metrics::Source do
 
     class << self
       def clear_metrics
-        @metrics = nil
+        @metrics     = nil
+        @metrics_for = nil
       end
     end
 
@@ -56,6 +57,38 @@ describe Invoca::Metrics::Source do
       @metric_tester = ExampleMetricTester.new
       ExampleMetricTester.clear_metrics
       @metric_tester.metrics.extend TrackSentMessage
+    end
+
+    context "metrics clients" do
+      setup do
+        ExampleMetricTester.clear_metrics
+        Invoca::Metrics.sub_server_name = "default_sub_server_name"
+        Invoca::Metrics.config = {
+          deploy_group: {
+            statsd_host: "255.0.0.123"
+          },
+          region: {
+            statsd_host: "255.0.0.456"
+          }
+        }
+        Invoca::Metrics.default_config_key = :deploy_group
+      end
+
+      context "#metrics" do
+        should "return metrics client for default_config_key" do
+          metrics_client = @metric_tester.metrics
+          assert_equal "default_sub_server_name", metrics_client.sub_server_name
+          assert_equal "255.0.0.123", metrics_client.hostname
+        end
+      end
+
+      context "#metrics_for" do
+        should "return metrics client for given config_key" do
+          metrics_client = @metric_tester.metrics_for(config_key: :region)
+          assert_equal "default_sub_server_name", metrics_client.sub_server_name
+          assert_equal "255.0.0.456", metrics_client.hostname
+        end
+      end
     end
 
     should "provide a gauge method" do

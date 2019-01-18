@@ -38,6 +38,23 @@ describe Invoca::Metrics::Client do
       assert_equal "127.0.0.10", metrics_client.hostname
       assert_equal 1234,         metrics_client.port
     end
+
+    should "construct with given args along with default args" do
+      Invoca::Metrics.statsd_host = "127.0.0.10"
+      Invoca::Metrics.statsd_port = 1234
+      metrics_client = Invoca::Metrics::Client.metrics(statsd_host: "127.0.0.255", statsd_port: 5678)
+      assert_equal "127.0.0.255", metrics_client.hostname
+      assert_equal 5678,          metrics_client.port
+    end
+  end
+
+  context "#server_name" do
+    should "return server_label for backwards compatibility" do
+      stub_metrics_as_production_unicorn
+      metrics_client = Invoca::Metrics::Client.metrics
+      assert_equal metrics_client.server_name, metrics_client.server_label
+      assert_equal "prod-fe1", metrics_client.server_name
+    end
   end
 
   context "reporting to statsd" do
