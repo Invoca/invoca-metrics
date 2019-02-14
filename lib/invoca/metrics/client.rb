@@ -87,12 +87,12 @@ module Invoca
 
       class << self
         # Default values are required for backwards compatibility
-        def metrics(statsd_host:     Invoca::Metrics.statsd_host,
-                    statsd_port:     Invoca::Metrics.statsd_port,
-                    cluster_name:    Invoca::Metrics.cluster_name,
-                    service_name:    Invoca::Metrics.service_name,
-                    server_name:     Invoca::Metrics.server_name,
-                    sub_server_name: Invoca::Metrics.sub_server_name)
+        def metrics(statsd_host:     Invoca::Metrics.default_client_config[:statsd_host],
+                    statsd_port:     Invoca::Metrics.default_client_config[:statsd_port],
+                    cluster_name:    Invoca::Metrics.default_client_config[:cluster_name],
+                    service_name:    Invoca::Metrics.default_client_config[:service_name],
+                    server_name:     Invoca::Metrics.default_client_config[:server_name],
+                    sub_server_name: Invoca::Metrics.default_client_config[:sub_server_name])
           new(statsd_host || Client::STATSD_DEFAULT_HOSTNAME,
               statsd_port || Client::STATSD_DEFAULT_PORT,
               cluster_name,
