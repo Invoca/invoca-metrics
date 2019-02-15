@@ -39,6 +39,23 @@ describe Invoca::Metrics::Client do
       assert_equal 1234,         metrics_client.port
     end
 
+    should "properly construct with configured statsd config for default_config_key" do
+      stub_metrics(server_name:        "prod-fe1",
+                   service_name:       "unicorn",
+                   statsd_host:        "127.0.0.1",
+                   statsd_port:        443,
+                   sub_server_name:    "sub_server_1",
+                   config:             { deploy_group: { server_name: "primary", statsd_host: "128.0.0.2", statsd_port: 3001 } },
+                   default_config_key: :deploy_group)
+
+      metrics_client = Invoca::Metrics::Client.metrics
+
+      assert_equal "128.0.0.2",    metrics_client.hostname
+      assert_equal 3001,           metrics_client.port
+      assert_equal "primary",      metrics_client.server_label
+      assert_equal "sub_server_1", metrics_client.sub_server_name
+    end
+
     should "construct with given args along with default args" do
       Invoca::Metrics.statsd_host = "127.0.0.10"
       Invoca::Metrics.statsd_port = 1234
