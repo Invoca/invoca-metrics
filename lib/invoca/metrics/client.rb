@@ -115,10 +115,10 @@ module Invoca
       end
 
       def send_to_socket(message)
-        self.class.logger.debug { "Statsd: #{message}" } if self.class.logger
+        # self.class.logger.debug { "Statsd: #{message}" } if self.class.logger
         socket.send(message, 0)
-      rescue => boom
-        self.class.logger.error { "Statsd: #{boom.class} #{boom}" } if self.class.logger
+      rescue => ex
+        self.class.logger.error { "Statsd exception sending: #{ex.class}: #{ex}" } if self.class.logger
         nil
       end
 
