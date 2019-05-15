@@ -1,5 +1,7 @@
-require File.expand_path('../../../../test_helper',  __FILE__)
-require File.expand_path('../../../../helpers/metrics/metrics_test_helpers', __FILE__)
+# frozen_string_literal: true
+
+require_relative '../../../test_helper'
+require_relative '../../../helpers/metrics/metrics_test_helpers'
 
 describe Invoca::Metrics::Client do
 
@@ -220,7 +222,7 @@ describe Invoca::Metrics::Client do
 
       should "send a millisecond metric value based on block to the socket" do
         @metrics_client.timer("test_metric") { 1 + 1 }
-        assert /test_metric.timer:[0-9]*|ms/ =~ @metrics_client.sent_message
+        assert_match(/test_metric.timer:[0-9]*|ms/, @metrics_client.sent_message)
       end
 
       should "send correct second metric value based on block" do

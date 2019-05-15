@@ -1,4 +1,6 @@
-require File.expand_path('./../track_sent_message',  __FILE__)
+# frozen_string_literal: true
+
+require_relative 'track_sent_message'
 
 module MetricsTestHelpers
   include TrackSentMessage

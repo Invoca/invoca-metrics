@@ -1,4 +1,7 @@
-require File.expand_path('../../../test_helper',  __FILE__)
+# frozen_string_literal: true
+
+require_relative '../../test_helper'
+require_relative '../../../test/helpers/metrics/metrics_test_helpers'
 
 describe Invoca::Metrics do
   include MetricsTestHelpers
@@ -15,8 +18,8 @@ describe Invoca::Metrics do
     end
 
     should "raise an argument error if a config is given with an invalid key" do
-      expected_allowed_keys = [:service_name, :server_name, :sub_server_name, :cluster_name, :statsd_host, :statsd_port]
-      assert_raises(ArgumentError, /Invalid config.*Allowed fields for config key: #{expected_allowed_keys}/) do
+      expected_allowed_keys = "[:service_name, :server_name, :sub_server_name, :cluster_name, :statsd_host, :statsd_port]"
+      assert_raises(ArgumentError, /Invalid config.*Allowed fields for config key: #{Regexp.escape(expected_allowed_keys)}/) do
         Invoca::Metrics.config = {
           deployment_group: {
             service_name: "Valid deployment group service name key",

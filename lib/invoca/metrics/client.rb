@@ -62,7 +62,7 @@ module Invoca
         name_and_type = [name, "timer", @server_label].join(STATSD_METRICS_SEPARATOR)
 
         if milliseconds.nil?
-          result, block_time = time(name_and_type, &block)
+          result, _block_time = time(name_and_type, &block)
           result
         else
           timing(name_and_type, milliseconds)
@@ -115,10 +115,10 @@ module Invoca
       end
 
       def send_to_socket(message)
-        # self.class.logger.debug { "Statsd: #{message}" } if self.class.logger
+        # self.class.logger&.debug { "Statsd: #{message}" }
         socket.send(message, 0)
       rescue => ex
-        self.class.logger.error { "Statsd exception sending: #{ex.class}: #{ex}" } if self.class.logger
+        self.class.logger&.error { "Statsd exception sending: #{ex.class}: #{ex}" }
         nil
       end
 

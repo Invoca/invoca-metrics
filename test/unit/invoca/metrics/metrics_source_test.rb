@@ -1,5 +1,7 @@
-require File.expand_path('../../../../test_helper',  __FILE__)
-require File.expand_path('../../../../helpers/metrics/metrics_test_helpers', __FILE__)
+# frozen_string_literal: true
+
+require_relative '../../../test_helper'
+require_relative '../../../helpers/metrics/metrics_test_helpers'
 
 describe Invoca::Metrics::Source do
 
@@ -104,8 +106,8 @@ describe Invoca::Metrics::Source do
     should "provide a timer method" do
       @metric_tester.timer_trigger("Test.anything", 15)
       assert_equal "unicorn.Test.anything.timer.prod-fe1:15|ms", @metric_tester.metrics.sent_message
-      @metric_tester.timer_trigger("Test.anything") { test = 1 + 1 }
-      assert /unicorn.prod-fe1.Test.anything.timer:[0-9]*|ms/ =~ @metric_tester.metrics.sent_messages.last
+      @metric_tester.timer_trigger("Test.anything") { 1 + 2 }
+      assert_match(/unicorn.prod-fe1.Test.anything.timer:[0-9]*|ms/, @metric_tester.metrics.sent_messages.last)
     end
 
     should "provide an increment method" do

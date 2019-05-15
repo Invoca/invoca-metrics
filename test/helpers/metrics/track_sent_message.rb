@@ -3,7 +3,7 @@ module TrackSentMessage
   attr_reader :sent_messages
 
   def sent_message
-    if @sent_messages
+    if defined?(@sent_messages) && @sent_messages
       @sent_messages.size <= 1 or raise "#{@sent_messages.size} sent_messages!"
       @sent_messages.first
     end

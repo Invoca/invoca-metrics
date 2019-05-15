@@ -1,5 +1,7 @@
-require File.expand_path('../../../../test_helper',  __FILE__)
-require File.expand_path('../../../../helpers/metrics/metrics_test_helpers', __FILE__)
+# frozen_string_literal: true
+
+require_relative '../../../test_helper'
+require_relative '../../../helpers/metrics/metrics_test_helpers'
 
 describe Invoca::Metrics::Batch do
   include MetricsTestHelpers
