@@ -20,6 +20,10 @@ module Invoca
         @service_name or raise ArgumentError, "You must assign a value to Invoca::Metrics.service_name"
       end
 
+      def initialized?
+        @service_name
+      end
+
       def config
         @config ||= {}
       end

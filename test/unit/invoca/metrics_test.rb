@@ -6,9 +6,27 @@ require_relative '../../../test/helpers/metrics/metrics_test_helpers'
 describe Invoca::Metrics do
   include MetricsTestHelpers
 
-  should "raise an exception if service name is not defined" do
-    Invoca::Metrics.service_name = nil
-    assert_raises(ArgumentError) { Invoca::Metrics.service_name }
+  describe ".service_name" do
+    should "raise an exception if service name is not defined" do
+      Invoca::Metrics.service_name = nil
+      assert_raises(ArgumentError) { Invoca::Metrics.service_name }
+    end
+  end
+
+  describe ".initialized?" do
+    should "be falsey when service name not set" do
+      Invoca::Metrics.service_name = nil
+      refute Invoca::Metrics.initialized?
+    end
+
+    should "be truthy when service name set" do
+      begin
+        Invoca::Metrics.service_name = "service"
+        assert Invoca::Metrics.initialized?
+      ensure
+        Invoca::Metrics.service_name = nil
+      end
+    end
   end
 
   context ".config" do
