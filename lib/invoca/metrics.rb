@@ -1,8 +1,6 @@
 require 'active_support'
 require 'active_support/core_ext'
 
-require "invoca/common"
-
 require "invoca/metrics/version"
 require "invoca/metrics/client"
 require "invoca/metrics/direct_metric"
