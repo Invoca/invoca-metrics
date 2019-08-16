@@ -1,7 +1,8 @@
-# Directly reports metrics without sending through statsd.  Does not add process information to metric names.
+# frozen_string_literal: true
 
 module Invoca
   module Metrics
+    # Directly reports metrics without sending through graphite.  Does not add process information to metric names.
     class DirectMetric
       attr_reader :name, :value, :tick
 
@@ -16,26 +17,14 @@ module Invoca
       end
 
       PERIOD = 60
-      SENSU_PORT = 3030
-      SENSU_HOST = '127.0.0.1'
+      DEFAULT_PORT = 2003
+      DEFAULT_HOST = '127.0.0.1'
 
       class << self
         def report(metrics)
-          timeslot = Time.now.to_i
           metrics_output = [metrics].flatten.map { |m| m.to_s }.join("\n") + "\n"
 
-          send_to_sensu(
-              name:         "application_metrics",
-              type:         "metric",
-              command:      "rr_metrics",
-              output:       metrics_output,
-              handlers:     ["graphite"],
-              issued:       timeslot,
-              executed:     timeslot,
-              standalone:   true,
-              interval:     PERIOD,
-              subscribers:  ["all"]
-          )
+          send_to_metric_host(metrics_output)
         end
 
         def generate_distribution(metric_prefix, metric_values, tick = nil)
@@ -65,8 +54,13 @@ module Invoca
 
         private
 
-        def send_to_sensu(message)
-          UDPSocket.new.send(message.to_json + "\n", 0, SENSU_HOST, SENSU_PORT)
+        def send_to_metric_host(message)
+          host = ENV["DIRECT_METRIC_HOST"] || DEFAULT_HOST
+          port = (ENV["DIRECT_METRIC_PORT"] || DEFAULT_PORT).to_i
+
+          TCPSocket.open(host, port) do |tcp|
+            tcp.send(message, 0)
+          end
         end
       end
     end
