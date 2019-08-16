@@ -4,14 +4,21 @@ require_relative '../../../test_helper'
 
 describe Invoca::Metrics::DirectMetric do
 
-  def stubs_sensu_udp_socket
-    @packets = []
-    mock.instance_of(UDPSocket).send.with_any_args do |message,flags,host,port|
-      @packets << message
-      assert_equal 0,                                         flags
-      assert_equal Invoca::Metrics::DirectMetric::SENSU_HOST, host
-      assert_equal Invoca::Metrics::DirectMetric::SENSU_PORT, port
+  class MockTCPSocket
+    attr_reader :packets
+
+    def initialize
+      @packets = []
     end
+
+    def send(message, _flags)
+      @packets << message
+    end
+  end
+
+  def stubs_tcp_socket(target_host: Invoca::Metrics::DirectMetric::DEFAULT_HOST, target_port: Invoca::Metrics::DirectMetric::DEFAULT_PORT)
+    @socket = MockTCPSocket.new
+    mock(TCPSocket).open(target_host, target_port).yields(@socket)
   end
 
   context "direct metrics" do
@@ -54,63 +61,49 @@ describe Invoca::Metrics::DirectMetric do
       should "Report a single metric with the proper boiler plate" do
         metric = Invoca::Metrics::DirectMetric.new("my.new.metric", 5)
 
-        stubs_sensu_udp_socket
+        stubs_tcp_socket
 
         Invoca::Metrics::DirectMetric.report(metric)
 
-        assert_equal 1, @packets.size
-
-        parsed_message = ActiveSupport::JSON.decode( @packets.first )
-
-        # Content
-        assert_equal "my.new.metric 5 1398063600\n", parsed_message['output']
-
-        # Boiler plate
-        assert_equal 'application_metrics', parsed_message['name']
-        assert_equal 'metric', parsed_message['type']
-        assert_equal 'rr_metrics', parsed_message['command']
-        assert_equal ["graphite"], parsed_message['handlers']
+        assert_equal 1, @socket.packets.size
+        assert_equal "my.new.metric 5 1398063600\n", @socket.packets.first
       end
 
       should "report multiple messages" do
         metrics = (1..5).map { |id| Invoca::Metrics::DirectMetric.new("my.new.metric#{id}", id) }
 
-        stubs_sensu_udp_socket
+        stubs_tcp_socket
 
         Invoca::Metrics::DirectMetric.report(metrics)
-        parsed_message = ActiveSupport::JSON.decode( @packets.first )
 
         expected = "my.new.metric1 1 1398063600\nmy.new.metric2 2 1398063600\nmy.new.metric3 3 1398063600\nmy.new.metric4 4 1398063600\nmy.new.metric5 5 1398063600\n"
-        assert_equal expected, parsed_message['output']
+        assert_equal expected, @socket.packets.first
       end
     end
 
     context "generate_distribution" do
       should "use the passed in tick" do
-        stubs_sensu_udp_socket
+        stubs_tcp_socket
         metrics = Invoca::Metrics::DirectMetric.generate_distribution("bob.is.testing",[], 10022)
         Invoca::Metrics::DirectMetric.report(metrics)
-        parsed_message = ActiveSupport::JSON.decode( @packets.first )
 
         expected = "bob.is.testing.count 0 10022\n"
-        assert_equal expected, parsed_message['output']
+        assert_equal expected, @socket.packets.first
       end
 
       should "just report the count when called with an empty list" do
-        stubs_sensu_udp_socket
+        stubs_tcp_socket
         metrics = Invoca::Metrics::DirectMetric.generate_distribution("bob.is.testing",[])
         Invoca::Metrics::DirectMetric.report(metrics)
-        parsed_message = ActiveSupport::JSON.decode( @packets.first )
 
         expected = "bob.is.testing.count 0 1398063600\n"
-        assert_equal expected, parsed_message['output']
+        assert_equal expected, @socket.packets.first
       end
 
       should "correctly compute min max and median" do
-        stubs_sensu_udp_socket
+        stubs_tcp_socket
         metrics = Invoca::Metrics::DirectMetric.generate_distribution("bob.is.testing",(0..99).to_a)
         Invoca::Metrics::DirectMetric.report(metrics)
-        parsed_message = ActiveSupport::JSON.decode( @packets.first )
 
         expected = [
             "bob.is.testing.count 100 1398063600",
@@ -119,7 +112,29 @@ describe Invoca::Metrics::DirectMetric do
             "bob.is.testing.median 50 1398063600",
             "bob.is.testing.upper_90 90 1398063600"
         ]
-        assert_equal expected, parsed_message['output'].split("\n")
+        assert_equal expected, @socket.packets.first.split("\n")
+      end
+    end
+
+    describe "environment configuration" do
+      after do
+        ENV["DIRECT_METRIC_HOST"] = nil
+        ENV["DIRECT_METRIC_PORT"] = nil
+      end
+
+      it "allows environment to define DIRECT_METRIC_HOST and DIRECT_METRIC_PORT" do
+        target_host = "carbon-relay.test.com"
+        target_port = "2003"
+
+        ENV["DIRECT_METRIC_HOST"] = target_host
+        ENV["DIRECT_METRIC_PORT"] = target_port
+
+        stubs_tcp_socket(target_host: target_host, target_port: target_port.to_i)
+
+        metric = Invoca::Metrics::DirectMetric.new("my.new.metric", 5)
+        Invoca::Metrics::DirectMetric.report(metric)
+
+        assert_equal "my.new.metric 5 1398063600\n", @socket.packets.first
       end
     end
   end
