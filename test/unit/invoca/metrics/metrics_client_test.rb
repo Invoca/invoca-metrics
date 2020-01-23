@@ -230,6 +230,18 @@ describe Invoca::Metrics::Client do
         @metrics_client.timer("unicorn.test_metric.prod-fe1") { 1 + 1 }
       end
 
+      should "return the value from the block" do
+        assert_equal 2, @metrics_client.timer("unicorn.test_metric.prod-fe1") { 1 + 1 }
+      end
+
+      should "return both the value from the block and the timing if specified" do
+        stub(@metrics_client).time { [2, 5000] }
+        result_from_block, timing = @metrics_client.timer("unicorn.test_metric.prod-fe1", return_timing: true) { 1 + 1 }
+
+        assert_equal 2, result_from_block
+        assert_equal 5000, timing
+      end
+
       [nil, ''].each do |value|
         should "fail if metric name is #{value.inspect}" do
           assert_raises(ArgumentError, /Must specify a metric name/) do

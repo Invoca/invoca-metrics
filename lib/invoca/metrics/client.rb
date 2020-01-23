@@ -56,14 +56,14 @@ module Invoca
         end
       end
 
-      def timer(name, milliseconds = nil, &block)
+      def timer(name, milliseconds = nil, return_timing: false, &block)
         name.present? or raise ArgumentError, "Must specify a metric name."
         (!milliseconds.nil? ^ block_given?) or raise ArgumentError, "Must pass exactly one of milliseconds or block."
         name_and_type = [name, "timer", @server_label].join(STATSD_METRICS_SEPARATOR)
 
         if milliseconds.nil?
-          result, _block_time = time(name_and_type, &block)
-          result
+          result, block_time = time(name_and_type, &block)
+          return_timing ? [result, block_time] : result
         else
           timing(name_and_type, milliseconds)
         end
