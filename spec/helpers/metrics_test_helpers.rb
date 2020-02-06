@@ -54,5 +54,4 @@ module MetricsTestHelpers
       end
     end
   end
-
 end

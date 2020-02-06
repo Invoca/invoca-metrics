@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MetricsGemTester
   include Invoca::Metrics::Source
 

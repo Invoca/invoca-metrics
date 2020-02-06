@@ -1,17 +1,13 @@
-require "bundler/gem_tasks"
+# frozen_string_literal: true
 
-require 'rake/testtask'
+require 'rake'
 
-namespace :test do
+task default: :rspec
 
-  Rake::TestTask.new do |t|
-    t.name = :unit
-    t.libs << "test"
-    t.pattern = 'test/unit/invoca/**/*_test.rb'
-    t.verbose = true
+desc "Run RSpec Unit Tests"
+begin
+  require 'rspec/core/rake_task'
+  RSpec::Core::RakeTask.new(:rspec) do |t|
+    # t.rspec_opts = '--format documentation'
   end
-  Rake::Task['test:unit'].comment = "Run the unit tests in test/unit"
-
 end
-
-task :default => 'test:unit'
