@@ -3,7 +3,6 @@
 require_relative '../../../spec_helper'
 
 describe Invoca::Metrics::DirectMetric do
-
   class MockTCPSocket
     attr_reader :packets
 
@@ -149,4 +148,3 @@ describe Invoca::Metrics::DirectMetric do
     end
   end
 end
-

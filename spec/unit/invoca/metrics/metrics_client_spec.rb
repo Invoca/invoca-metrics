@@ -7,13 +7,13 @@ describe Invoca::Metrics::Client do
     before(:each) { stub_metrics_as_production_unicorn }
 
     it "properly construct with params and statsd both turned on" do
-      custom_host = "127.0.0.2"
-      custom_port = 8300
-      cluster_name = "test_cluster"
-      service_name = "test_service"
-      server_name = "test_server"
+      custom_host     = "127.0.0.2"
+      custom_port     = 8300
+      cluster_name    = "test_cluster"
+      service_name    = "test_service"
+      server_name     = "test_server"
       sub_server_name = "test_sub_server"
-      metrics_client = Invoca::Metrics::Client.new(custom_host, custom_port, cluster_name, service_name, server_name, sub_server_name)
+      metrics_client  = Invoca::Metrics::Client.new(custom_host, custom_port, cluster_name, service_name, server_name, sub_server_name)
 
       expect(metrics_client.hostname).to eq(custom_host)
       expect(metrics_client.port).to eq(custom_port)
@@ -30,13 +30,27 @@ describe Invoca::Metrics::Client do
     it "properly construct with configured statsd connection information" do
       Invoca::Metrics.statsd_host = "127.0.0.10"
       Invoca::Metrics.statsd_port = 1234
-      metrics_client = Invoca::Metrics::Client.metrics
+      metrics_client              = Invoca::Metrics::Client.metrics
       expect(metrics_client.hostname).to eq("127.0.0.10")
       expect(metrics_client.port).to eq(1234)
     end
 
     it "properly construct with configured statsd config for default_config_key" do
-      stub_metrics(:server_name => "prod-fe1", :service_name => "unicorn", :statsd_host => "127.0.0.1", :statsd_port => 443, :sub_server_name => "sub_server_1", :config => ({ :deploy_group => ({ :server_name => "primary", :statsd_host => "128.0.0.2", :statsd_port => 3001 }) }), :default_config_key => :deploy_group)
+      stub_metrics(
+        server_name:        "prod-fe1",
+        service_name:       "unicorn",
+        statsd_host:        "127.0.0.1",
+        statsd_port:        443,
+        sub_server_name:    "sub_server_1",
+        config:             {
+          deploy_group: {
+            server_name: "primary",
+            statsd_host: "128.0.0.2",
+            statsd_port: 3001
+          }
+        },
+        default_config_key: :deploy_group
+      )
       metrics_client = Invoca::Metrics::Client.metrics
       expect(metrics_client.hostname).to eq("128.0.0.2")
       expect(metrics_client.port).to eq(3001)
@@ -47,7 +61,7 @@ describe Invoca::Metrics::Client do
     it "construct with given args along with default args" do
       Invoca::Metrics.statsd_host = "127.0.0.10"
       Invoca::Metrics.statsd_port = 1234
-      metrics_client = Invoca::Metrics::Client.metrics(:statsd_host => "127.0.0.255", :statsd_port => 5678)
+      metrics_client              = Invoca::Metrics::Client.metrics(statsd_host: "127.0.0.255", statsd_port: 5678)
       expect(metrics_client.hostname).to eq("127.0.0.255")
       expect(metrics_client.port).to eq(5678)
     end
@@ -86,7 +100,7 @@ describe Invoca::Metrics::Client do
 
       it "use correct format with sub_server_name assigned" do
         Invoca::Metrics.sub_server_name = "9000"
-        @metrics_client = metrics_client_with_message_tracking
+        @metrics_client                 = metrics_client_with_message_tracking
         @metrics_client.counter("my_test_metric", 1)
         expect(@metrics_client.sent_message).to eq("unicorn.my_test_metric.counter.prod-fe1.9000:1|c")
         Invoca::Metrics.sub_server_name = nil
@@ -209,7 +223,7 @@ describe Invoca::Metrics::Client do
 
       it "return both the value from the block and the timing if specified" do
         allow(@metrics_client).to receive(:time).and_return([2, 5000])
-        result_from_block, timing = @metrics_client.timer("unicorn.test_metric.prod-fe1", :return_timing => true) do
+        result_from_block, timing = @metrics_client.timer("unicorn.test_metric.prod-fe1", return_timing: true) do
           (1 + 1)
         end
         expect(result_from_block).to eq(2)
@@ -231,7 +245,7 @@ describe Invoca::Metrics::Client do
 
     describe "transmit" do
       it "send the message" do
-        @metrics_client.transmit("Something bad happened.", :custom_data => "12:00pm")
+        @metrics_client.transmit("Something bad happened.", custom_data: "12:00pm")
       end
     end
 
@@ -242,19 +256,14 @@ describe Invoca::Metrics::Client do
       end
 
       it "use a bound udp socket to connect to statsd" do
-        begin
-          (addr = @metrics_client.send(:socket).remote_address
-          expect(addr.ip_address).to(eq("127.0.0.1"))
-          expect(addr.ip_port).to(eq(8125)))
-        rescue Errno::ENOTCONN => bad
-          # do nothing
-        end
-        expect(bad).to be_nil
+        addr = @metrics_client.send(:socket).remote_address
+        expect(addr.ip_address).to eq("127.0.0.1")
+        expect(addr.ip_port).to eq(8125)
       end
 
       it "use a new socket per Thread" do
         main_socket = @metrics_client.send(:socket)
-        new_thread = Thread.new do
+        new_thread  = Thread.new do
           thread_socket = @metrics_client.send(:socket)
           expect(main_socket.fileno != thread_socket.fileno).to be_truthy
         end
@@ -263,7 +272,7 @@ describe Invoca::Metrics::Client do
 
       it "not use a new socket per Fiber" do
         main_socket = @metrics_client.send(:socket)
-        new_fiber = Fiber.new do
+        new_fiber   = Fiber.new do
           fiber_socket = @metrics_client.send(:socket)
           Fiber.yield((main_socket.fileno == fiber_socket.fileno))
         end
