@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    jenkins/invoca-metrics: 'true'
+  namespace: jenkins
+  name: invoca-metrics
+spec:
+  tolerations:
+    - key: dedicated
+      operator: Equal
+      value: jenkins
+      effect: NoSchedule
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kops.k8s.io/instancegroup
+                operator: In
+                values:
+                  - jenkins
+  containers:
+    - name: ruby
+      image: ruby:2.6.5
+      tty: true
+      resources:
+        requests:
+          memory: "100Mi"
+      command:
+        - cat
