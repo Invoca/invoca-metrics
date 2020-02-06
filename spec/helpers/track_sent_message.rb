@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+
 # meant to extend Statsd to capture what would be sent out the socket
+
 module TrackSentMessage
   attr_reader :sent_messages
 

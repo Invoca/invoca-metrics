@@ -1,16 +1,5 @@
 # frozen_string_literal: true
 
-require 'rails/all'
-
-require "minitest/autorun"
-require 'rubygems'
-require 'rr'
-require 'shoulda'
-
-require 'invoca/metrics'
-
-ActiveSupport.test_order = :random
-
 class Time
   cattr_reader :now_override
 

@@ -1,0 +1,51 @@
+#!/usr/bin/groovy
+
+@Library('jenkins-pipeline@v0.4.4')
+import org.apache.commons.lang.StringUtils;
+
+pipeline {
+  agent {
+    kubernetes {
+      defaultContainer "ruby"
+      yamlFile ".jenkins/ruby_build_pod.yml"
+    }
+  }
+
+  environment {
+    GITHUB_TOKEN = credentials('github_token')
+  }
+
+  stages {
+    stage('Setup') {
+      steps {
+        script {
+          sh 'bundle install'
+        }
+      }
+    }
+
+    stage('Unit Tests') {
+      steps {
+        sh 'bundle exec rspec --format RspecJunitFormatter --out spec/reports/rspec.xml'
+      }
+
+      post {
+        always { junit 'spec/reports/rspec.xml' }
+        success { updateGitHubStatus('clean-build', 'success', 'Unit tests.') }
+        failure { updateGitHubStatus('clean-build', 'failure', 'Unit tests.') }
+      }
+    }
+  }
+}
+
+void updateGitHubStatus(String context, String status, String description) {
+  gitHubStatus([
+    repoSlug:    'Invoca/invoca-metrics',
+    sha:         env.GIT_COMMIT,
+    description: description,
+    context:     context,
+    targetURL:   env.BUILD_URL,
+    token:       env.GITHUB_TOKEN,
+    status:      status
+  ])
+}
