@@ -7,8 +7,9 @@ gemspec
 
 group :development do
   gem 'bundler',   '~> 1.3'
-  gem 'rspec'
   gem 'pry'
   gem 'rake'
+  gem 'rspec'
+  gem 'rspec_junit_formatter'
   gem 'ruby-prof'
 end
