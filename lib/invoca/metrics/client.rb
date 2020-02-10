@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'statsd'
 
 module Invoca
@@ -12,7 +14,6 @@ module Invoca
       attr_reader :hostname, :port, :statsd_prefix, :server_label, :sub_server_name
 
       def initialize(hostname, port, cluster_name, service_name, server_label, sub_server_name)
-
         @hostname        = hostname
         @port            = port
         @cluster_name    = cluster_name
@@ -29,13 +30,13 @@ module Invoca
       end
 
       def gauge(name, value)
-        if args = metric_args(name, value, "gauge")
+        if (args = metric_args(name, value, "gauge"))
           super(*args)
         end
       end
 
       def count(name, value = 1)
-        if args = metric_args(name, value, "counter")
+        if (args = metric_args(name, value, "counter"))
           super(*args)
         end
       end
@@ -51,7 +52,7 @@ module Invoca
       end
 
       def set(name, value)
-        if args = metric_args(name, value, nil)
+        if (args = metric_args(name, value, nil))
           super(*args)
         end
       end
@@ -73,11 +74,11 @@ module Invoca
         Metrics::Batch.new(self).easy(&block)
       end
 
-      def transmit(message, extra_data={})
-        # TODO - we need to wire up exception data to a monitoring service
+      def transmit(message, extra_data = {})
+        # TODO: - we need to wire up exception data to a monitoring service
       end
 
-      def time(stat, sample_rate=1)
+      def time(stat, sample_rate = 1)
         start = Time.now
         result = yield
         length_of_time = ((Time.now - start) * MILLISECONDS_IN_SECOND).round
@@ -102,7 +103,7 @@ module Invoca
         end
       end
 
-    protected
+      protected
 
       def metric_args(name, value, stat_type)
         name.present? or raise ArgumentError, "Must specify a metric name."
@@ -122,7 +123,7 @@ module Invoca
         nil
       end
 
-    private
+      private
 
       def socket
         Thread.current.thread_variable_get(:statsd_socket) || Thread.current.thread_variable_set(:statsd_socket, new_socket)
@@ -134,4 +135,3 @@ module Invoca
     end
   end
 end
-

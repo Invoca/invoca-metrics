@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 describe Invoca::Metrics::Source do
-
   # use this class to test the Metrics functionality as a mixed-in module
   # the idea is that it mixes in and uses the Metrics module just like any other class would
   class ExampleMetricTester
@@ -22,7 +21,7 @@ describe Invoca::Metrics::Source do
       metrics.counter(name)
     end
 
-    def timer_trigger(name, milliseconds=nil, &block)
+    def timer_trigger(name, milliseconds = nil, &block)
       metrics.timer(name, milliseconds, &block)
     end
 

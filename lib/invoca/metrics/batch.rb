@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Invoca
   module Metrics
     class Batch < Client
