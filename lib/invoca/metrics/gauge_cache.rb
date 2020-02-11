@@ -12,6 +12,21 @@ module Invoca
           Thread.current[THREAD_CACHE_STORAGE_KEY][cache_key_for_client(client)] ||= new(client)
         end
 
+        def start_report_thread(client)
+          Thread.current[THREAD_REPORT_THREAD_KEY] ||= {}
+          Thread.current[THREAD_REPORT_THREAD_KEY][cache_key_for_client(client)] ||= Thread.new do
+            loop do
+              GaugeCache[client].report
+              sleep 60
+            end
+          end
+        end
+
+        def reset
+          Thread.current[THREAD_REPORT_THREAD_KEY] = {}
+          Thread.current[THREAD_CACHE_STORAGE_KEY] = {}
+        end
+
         private
 
         def cache_key_for_client(client)

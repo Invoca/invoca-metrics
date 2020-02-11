@@ -1,8 +1,59 @@
 # frozen_string_literal: true
 
 describe Invoca::Metrics::GaugeCache do
+  let(:client) { double(Invoca::Metrics::Client) }
+
+  after(:each) { described_class.reset }
+
+  describe 'class' do
+    let(:cache) { double(described_class) }
+
+    before(:each) do
+      allow(client).to receive(:hostname).and_return('localhost')
+      allow(client).to receive(:port).and_return('5678')
+    end
+
+    describe '#[]' do
+      describe 'when passed a new client' do
+        it 'creates and returns a new instance of GaugeCache' do
+          expect(described_class).to receive(:new).with(client).and_return(cache)
+          expect(described_class[client]).to eq(cache)
+        end
+      end
+
+      describe 'when passed a previously used client' do
+        it 'returns the same GaugeCache previously returned' do
+          expect(described_class).to receive(:new).with(client).and_return(cache).exactly(1)
+          expect(described_class[client]).to eq(cache)
+          expect(described_class[client]).to eq(cache)
+        end
+      end
+    end
+
+    describe '#start_report_thread' do
+      describe 'when passed a new client' do
+        let(:thread) { double(Thread) }
+
+        it 'spins off a new thread for reporting the set gauges for that client' do
+          expect(Thread).to receive(:new).and_return(thread)
+          expect(described_class.start_report_thread(client)).to eq(thread)
+        end
+      end
+
+      describe 'when passed a previously used client' do
+        before(:each) do
+          described_class.start_report_thread(client)
+        end
+
+        it 'does nothing' do
+          expect(Thread).to_not receive(:new)
+          expect(described_class.start_report_thread(client)).to be_a(Thread)
+        end
+      end
+    end
+  end
+
   describe 'instance' do
-    let(:client) { double(Invoca::Metrics::Client) }
     let(:metric) { 'test.gauge.metric' }
     let(:value)  { 1 }
 
