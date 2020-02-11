@@ -23,6 +23,7 @@ module Invoca
 
         super(@hostname, @port)
         self.namespace = [@cluster_name, @service_name].compact.join(STATSD_METRICS_SEPARATOR).presence
+        GaugeCache.start_report_thread(self)
       end
 
       def server_name # For backwards compatibility

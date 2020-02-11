@@ -65,6 +65,15 @@ describe Invoca::Metrics::Client do
       expect(metrics_client.hostname).to eq("127.0.0.255")
       expect(metrics_client.port).to eq(5678)
     end
+
+    it "starts a gauge cache reporting thread for itself" do
+      Invoca::Metrics.statsd_host = "127.0.0.10"
+      Invoca::Metrics.statsd_port = 1234
+
+      expect(Invoca::Metrics::GaugeCache).to receive(:start_report_thread)
+
+      Invoca::Metrics::Client.metrics(statsd_host: "127.0.0.255", statsd_port: 5678)
+    end
   end
 
   describe "#server_name" do
