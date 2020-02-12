@@ -47,10 +47,11 @@ module Invoca
         @cache = @cache.merge(metric => value).compact
       end
 
-      # Reports all gauges that have been set in the cache as counts to the client
-      # used to generate the cache
+      # Reports all gauges that have been set in the cache as directly to the Client's parent method
+      # Uses the client that was used to generate the cache
       def report
-        @cache.each { |metric, value| @client.count(metric, value) }
+        statsd_gauge_method_for_client = ::Statsd.instance_method(:gauge).bind(@client)
+        @cache.each { |metric, value| statsd_gauge_method_for_client.call(metric, value) }
       end
     end
   end

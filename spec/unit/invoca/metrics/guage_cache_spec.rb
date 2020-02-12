@@ -1,17 +1,12 @@
 # frozen_string_literal: true
 
 describe Invoca::Metrics::GaugeCache do
-  let(:client) { double(Invoca::Metrics::Client) }
+  let(:client) { Invoca::Metrics::Client.new('localhost', '5678', 'test_cluster', 'test_service', 'test_label', 'sub_server') }
 
   after(:each) { described_class.reset }
 
   describe 'class' do
     let(:cache) { double(described_class) }
-
-    before(:each) do
-      allow(client).to receive(:hostname).and_return('localhost')
-      allow(client).to receive(:port).and_return('5678')
-    end
 
     describe '#[]' do
       describe 'when passed a new client' do
@@ -98,14 +93,18 @@ describe Invoca::Metrics::GaugeCache do
         let(:gauges) { {} }
 
         it 'reports nothing' do
-          expect(client).to_not receive(:count)
+          expect(client).to_not receive(:gauge)
           subject.report
         end
       end
 
       describe 'with gauges currently set' do
+        let(:proc) { double(Proc) }
+
         it 'reports all gauges currently set as counts' do
-          gauges.each { |metric, value| expect(client).to receive(:count).with(metric, value) }
+          expect(::Statsd).to receive(:instance_method).with(:gauge).and_return(proc)
+          expect(proc).to receive(:bind).with(client).and_return(proc)
+          gauges.each { |metric, value| expect(proc).to receive(:call).with(metric, value) }
           subject.report
         end
       end

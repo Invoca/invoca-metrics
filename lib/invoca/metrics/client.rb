@@ -31,9 +31,8 @@ module Invoca
       end
 
       def gauge(name, value)
-        if (args = metric_args(name, value, "gauge"))
-          super(*args)
-        end
+        name.present? or raise ArgumentError, "Must specify a metric name."
+        GaugeCache[self].set(name, value)
       end
 
       def count(name, value = 1)
