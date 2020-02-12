@@ -95,6 +95,7 @@ describe Invoca::Metrics::Client do
       it "use correct format for gauge" do
         @metrics_client.gauge("my_test_metric", 5)
         expect(@metrics_client.sent_message).to eq("unicorn.my_test_metric.gauge.prod-fe1:5|g")
+        expect(Invoca::Metrics::GaugeCache[@metrics_client].cache).to include("my_test_metric.gauge.prod-fe1" => 5)
       end
 
       it "use correct format for timer" do
@@ -125,6 +126,7 @@ describe Invoca::Metrics::Client do
       it "use correct format for gauge" do
         @metrics_client.gauge("my_test_metric", 5)
         expect(@metrics_client.sent_message).to eq("staging.unicorn.my_test_metric.gauge.staging-full-fe1:5|g")
+        expect(Invoca::Metrics::GaugeCache[@metrics_client].cache).to include("my_test_metric.gauge.staging-full-fe1" => 5)
       end
 
       it "use correct format for timer" do
@@ -149,6 +151,7 @@ describe Invoca::Metrics::Client do
       it "send the metric to the socket" do
         @metrics_client.gauge("test_metric", 5)
         expect(@metrics_client.sent_message).to eq("unicorn.test_metric.gauge.prod-fe1:5|g")
+        expect(Invoca::Metrics::GaugeCache[@metrics_client].cache).to include("my_test_metric.gauge.prod-fe1" => 5)
       end
 
       [nil, ""].each do |value|
