@@ -30,7 +30,7 @@ module Invoca
         private
 
         def cache_key_for_client(client)
-          [client.hostname, client.port].join("::")
+          [client.hostname, client.port].join(":")
         end
       end
 
