@@ -53,14 +53,15 @@ describe Invoca::Metrics::GaugeCache do
           expect(subject.cache).to eq(metric => 1)
         end
 
-        it 'should remove the metric from the cache' do
+        it 'should set the metric value to nil' do
           subject.set(metric, value)
-          expect(subject.cache).to_not include(metric)
+          expect(subject.cache).to eq(metric => value)
         end
       end
     end
 
     describe '#report' do
+      let(:proc) { double(Proc) }
       let(:gauges) do
         {
           'test.gauge.metric.1' => 1,
@@ -83,12 +84,33 @@ describe Invoca::Metrics::GaugeCache do
       end
 
       describe 'with gauges currently set' do
-        let(:proc) { double(Proc) }
-
         it 'reports all gauges currently set as counts' do
           expect(::Statsd).to receive(:instance_method).with(:gauge).and_return(proc)
           expect(proc).to receive(:bind).with(instance_of(Invoca::Metrics::Batch)).and_return(proc)
           gauges.each { |metric, value| expect(proc).to receive(:call).with(metric, value) }
+          subject.report
+        end
+      end
+
+      describe 'when some gauges set to nil' do
+        let(:gauges) do
+          {
+            'test.gauge.metric.1' => 1,
+            'test.gauge.metric.2' => nil,
+            'test.gauge.metric.3' => 1
+          }
+        end
+
+        it 'omits reporting of nil gauges' do
+          expect(::Statsd).to receive(:instance_method).with(:gauge).and_return(proc)
+          expect(proc).to receive(:bind).with(instance_of(Invoca::Metrics::Batch)).and_return(proc)
+          gauges.each do |metric, value|
+            if value.nil?
+              expect(proc).to receive(:call).with(metric, value).never
+            else
+              expect(proc).to receive(:call).with(metric, value)
+            end
+          end
           subject.report
         end
       end

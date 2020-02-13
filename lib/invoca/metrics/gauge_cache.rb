@@ -44,9 +44,10 @@ module Invoca
       end
 
       # Atomic method for setting the value for a particular gauge
-      # When the value is passed as nil, it atomically removes the metric from the cache
+      # When the value is passed as nil, it merges the value in, which will then be skipped
+      # during reporting of gauge metrics
       def set(metric, value)
-        @cache = @cache.merge(metric => value).compact
+        @cache = @cache.merge(metric => value)
       end
 
       # Reports all gauges that have been set in the cache as directly to the Client's parent method
@@ -54,7 +55,11 @@ module Invoca
       def report
         @client.batch do |stats_batch|
           statsd_gauge_method_for_batch = ::Statsd.instance_method(:gauge).bind(stats_batch)
-          @cache.each { |metric, value| statsd_gauge_method_for_batch.call(metric, value) }
+          @cache.each do |metric, value|
+            unless value.nil?
+              statsd_gauge_method_for_batch.call(metric, value)
+            end
+          end
         end
       end
     end
