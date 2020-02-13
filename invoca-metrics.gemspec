@@ -7,8 +7,8 @@ require 'invoca/metrics/version'
 Gem::Specification.new do |spec|
   spec.name          = "invoca-metrics"
   spec.version       = Invoca::Metrics::VERSION
-  spec.authors       = ["Colin Kelley", "Cary Penniman"]
-  spec.email         = ["colindkelley@gmail.com", "cpenniman@gmail.com"]
+  spec.authors       = ["Invoca development"]
+  spec.email         = ["development@invoca.com"]
   spec.description   = 'Invoca metrics reporting library'
   spec.summary       = 'Invoca metrics reporting library'
   spec.homepage      = "https://github.com/Invoca/invoca-metrics"
