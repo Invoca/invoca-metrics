@@ -12,4 +12,5 @@ group :development do
   gem 'rspec'
   gem 'rspec_junit_formatter'
   gem 'ruby-prof'
+  gem 'sourcify'
 end

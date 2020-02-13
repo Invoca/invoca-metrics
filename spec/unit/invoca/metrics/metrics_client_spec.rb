@@ -66,11 +66,11 @@ describe Invoca::Metrics::Client do
       expect(metrics_client.port).to eq(5678)
     end
 
-    it "starts a gauge cache reporting thread for itself" do
+    it "starts registers a gauge cache for itself" do
       Invoca::Metrics.statsd_host = "127.0.0.10"
       Invoca::Metrics.statsd_port = 1234
 
-      expect(Invoca::Metrics::GaugeCache).to receive(:start_report_thread)
+      expect(Invoca::Metrics::GaugeCache).to receive(:register).with(instance_of(described_class))
 
       Invoca::Metrics::Client.metrics(statsd_host: "127.0.0.255", statsd_port: 5678)
     end
@@ -95,7 +95,7 @@ describe Invoca::Metrics::Client do
       it "use correct format for gauge" do
         @metrics_client.gauge("my_test_metric", 5)
         expect(@metrics_client.sent_message).to eq("unicorn.my_test_metric.gauge.prod-fe1:5|g")
-        expect(Invoca::Metrics::GaugeCache[@metrics_client].cache).to include("my_test_metric.gauge.prod-fe1" => 5)
+        expect(@metrics_client.gauge_cache.cache).to include("my_test_metric.gauge.prod-fe1" => 5)
       end
 
       it "use correct format for timer" do
@@ -126,7 +126,7 @@ describe Invoca::Metrics::Client do
       it "use correct format for gauge" do
         @metrics_client.gauge("my_test_metric", 5)
         expect(@metrics_client.sent_message).to eq("staging.unicorn.my_test_metric.gauge.staging-full-fe1:5|g")
-        expect(Invoca::Metrics::GaugeCache[@metrics_client].cache).to include("my_test_metric.gauge.staging-full-fe1" => 5)
+        expect(@metrics_client.gauge_cache.cache).to include("my_test_metric.gauge.staging-full-fe1" => 5)
       end
 
       it "use correct format for timer" do
@@ -151,7 +151,7 @@ describe Invoca::Metrics::Client do
       it "send the metric to the socket" do
         @metrics_client.gauge("test_metric", 5)
         expect(@metrics_client.sent_message).to eq("unicorn.test_metric.gauge.prod-fe1:5|g")
-        expect(Invoca::Metrics::GaugeCache[@metrics_client].cache).to include("my_test_metric.gauge.prod-fe1" => 5)
+        expect(@metrics_client.gauge_cache.cache).to include("test_metric.gauge.prod-fe1" => 5)
       end
 
       [nil, ""].each do |value|

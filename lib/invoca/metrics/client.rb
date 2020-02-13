@@ -11,7 +11,7 @@ module Invoca
 
       MILLISECONDS_IN_SECOND = 1000
 
-      attr_reader :hostname, :port, :statsd_prefix, :server_label, :sub_server_name
+      attr_reader :hostname, :port, :statsd_prefix, :server_label, :sub_server_name, :gauge_cache
 
       def initialize(hostname, port, cluster_name, service_name, server_label, sub_server_name)
         @hostname        = hostname
@@ -23,7 +23,7 @@ module Invoca
 
         super(@hostname, @port)
         self.namespace = [@cluster_name, @service_name].compact.join(STATSD_METRICS_SEPARATOR).presence
-        GaugeCache.start_report_thread(self)
+        @gauge_cache = GaugeCache.register(self)
       end
 
       def server_name # For backwards compatibility
@@ -32,7 +32,7 @@ module Invoca
 
       def gauge(name, value)
         if (args = metric_args(name, value, "gauge"))
-          GaugeCache[self].set(*args)
+          @gauge_cache.set(*args)
           super(*args)
         end
       end

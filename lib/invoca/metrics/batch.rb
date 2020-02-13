@@ -11,6 +11,7 @@ module Invoca
         @server_label    = @client.server_label
         @sub_server_name = @client.sub_server_name
         @batch_size      = @client.batch_size
+        @gauge_cache     = @client.gauge_cache
         self.namespace   = @client.namespace
         @backlog         = []
       end

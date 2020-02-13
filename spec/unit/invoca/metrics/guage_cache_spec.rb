@@ -1,49 +1,31 @@
 # frozen_string_literal: true
 
+require 'sourcify'
+
 describe Invoca::Metrics::GaugeCache do
   let(:client) { Invoca::Metrics::Client.new('localhost', '5678', 'test_cluster', 'test_service', 'test_label', 'sub_server') }
-
-  after(:each) { described_class.reset }
 
   describe 'class' do
     let(:cache) { double(described_class) }
 
-    describe '#[]' do
-      describe 'when passed a new client' do
-        it 'creates and returns a new instance of GaugeCache' do
-          expect(described_class).to receive(:new).with(client).and_return(cache)
-          expect(described_class[client]).to eq(cache)
-        end
+    describe '#register' do
+      it 'initializes a new GaugeCache object for the client' do
+        expect(described_class).to receive(:new).with(client).and_return(cache)
+        expect(Thread).to receive(:new)
+        expect(described_class.register(client)).to eq(cache)
       end
 
-      describe 'when passed a previously used client' do
-        it 'returns the same GaugeCache previously returned' do
-          expect(described_class).to receive(:new).with(client).and_return(cache).exactly(1)
-          expect(described_class[client]).to eq(cache)
-          expect(described_class[client]).to eq(cache)
+      it 'kicks off a new thread for reporting the cached gauges' do
+        expect(described_class).to receive(:new).with(client).and_return(cache)
+        expect(Thread).to receive(:new) do |&block|
+          expect(block.to_source.chomp).to eq(<<~EOS.chomp)
+            proc do
+              gauge_cache.report
+              sleep(GAUGE_REPORT_INTERVAL)
+            end
+          EOS
         end
-      end
-    end
-
-    describe '#start_report_thread' do
-      describe 'when passed a new client' do
-        let(:thread) { double(Thread) }
-
-        it 'spins off a new thread for reporting the set gauges for that client' do
-          expect(Thread).to receive(:new).and_return(thread)
-          expect(described_class.start_report_thread(client)).to eq(thread)
-        end
-      end
-
-      describe 'when passed a previously used client' do
-        before(:each) do
-          described_class.start_report_thread(client)
-        end
-
-        it 'does nothing' do
-          expect(Thread).to_not receive(:new)
-          expect(described_class.start_report_thread(client)).to be_a(Thread)
-        end
+        expect(described_class.register(client)).to eq(cache)
       end
     end
   end

@@ -21,13 +21,12 @@ describe Invoca::Metrics::Batch do
       stats_batch.counter("test_runs", 1)
       stats_batch.gauge("current_size", 9)
       stats_batch.gauge("memory", 128000)
-
-      expect(Invoca::Metrics::GaugeCache[stats_batch].cache).to include("current_size.gauge.prod-fe1" => 9)
-      expect(Invoca::Metrics::GaugeCache[stats_batch].cache).to include("memory.gauge.prod-fe1" => 128000)
     end
 
     stats_lines = metrics_client.sent_message.split("\n")
     expect(stats_lines).to eq(expected)
+    expect(metrics_client.gauge_cache.cache).to include("current_size.gauge.prod-fe1" => 9)
+    expect(metrics_client.gauge_cache.cache).to include("memory.gauge.prod-fe1" => 128000)
   end
 
   it "batch multiple stats in one message, sent in batches" do
@@ -46,13 +45,12 @@ describe Invoca::Metrics::Batch do
       stats_batch.counter("test_runs", 1)
       stats_batch.gauge("current_size", 9)
       stats_batch.gauge("memory", 128000)
-
-      expect(Invoca::Metrics::GaugeCache[stats_batch].cache).to include("current_size.gauge.prod-fe1" => 9)
-      expect(Invoca::Metrics::GaugeCache[stats_batch].cache).to include("memory.gauge.prod-fe1" => 128000)
     end
 
     stats_lines = metrics_client.sent_messages.map { |msg| msg.split("\n") }
     expect(stats_lines).to eq(expected)
+    expect(metrics_client.gauge_cache.cache).to include("current_size.gauge.prod-fe1" => 9)
+    expect(metrics_client.gauge_cache.cache).to include("memory.gauge.prod-fe1" => 128000)
   end
 
   it "send nothing if batch is empty" do
