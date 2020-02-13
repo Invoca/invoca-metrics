@@ -22,7 +22,7 @@ module Invoca
 
       class << self
         def report(metrics)
-          metrics_output = [metrics].flatten.map(&:to_s).join("\n") + "\n"
+          metrics_output = [metrics].flatten.map { |metric| "#{metric}\n" }.join
 
           send_to_metric_host(metrics_output)
         end
