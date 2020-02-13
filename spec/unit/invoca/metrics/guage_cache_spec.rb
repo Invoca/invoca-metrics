@@ -9,14 +9,16 @@ describe Invoca::Metrics::GaugeCache do
     let(:cache) { double(described_class) }
 
     describe '#register' do
+      before(:each) do
+        expect(described_class).to receive(:new).and_return(cache)
+      end
+
       it 'initializes a new GaugeCache object for the client' do
-        expect(described_class).to receive(:new).with(client).and_return(cache)
         expect(Thread).to receive(:new)
         expect(described_class.register(client)).to eq(cache)
       end
 
       it 'kicks off a new thread for reporting the cached gauges' do
-        expect(described_class).to receive(:new).with(client).and_return(cache)
         expect(Thread).to receive(:new) do |&block|
           expect(block.to_source.chomp).to eq(<<~EOS.chomp)
             proc do

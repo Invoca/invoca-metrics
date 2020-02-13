@@ -7,12 +7,32 @@ module Invoca
 
       class << self
         def register(client)
-          new(client).tap do |gauge_cache|
+          registered_gauge_caches[gauge_cache_key_for_client(client)] ||= new(client).tap do |gauge_cache|
             Thread.new do
               gauge_cache.report
               sleep(GAUGE_REPORT_INTERVAL)
             end
           end
+        end
+
+        def reset
+          @registered_gauge_caches = {}
+        end
+
+        private
+
+        def gauge_cache_key_for_client(client)
+          [
+            client.hostname,
+            client.port,
+            client.namespace,
+            client.server_name,
+            client.sub_server_name
+          ].freeze
+        end
+
+        def registered_gauge_caches
+          @registered_gauge_caches ||= {}
         end
       end
 
