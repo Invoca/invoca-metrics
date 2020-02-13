@@ -3,8 +3,9 @@
 module Invoca
   module Metrics
     class GaugeCache
-      THREAD_CACHE_STORAGE_KEY = "InvocaMetrics_GaugeCache"
-      THREAD_REPORT_THREAD_KEY = "InvocaMetrics_GaugeCache_ReportThread"
+      THREAD_CACHE_STORAGE_KEY = "Invoca::Metric::GaugeCache"
+      THREAD_REPORT_THREAD_KEY = "Invoca::Metrics::GaugeCache__ReportThread"
+      GAUGE_REPORT_INTERVAL    = 60
 
       class << self
         def [](client)
@@ -16,8 +17,8 @@ module Invoca
           Thread.current[THREAD_REPORT_THREAD_KEY] ||= {}
           Thread.current[THREAD_REPORT_THREAD_KEY][cache_key_for_client(client)] ||= Thread.new do
             loop do
-              GaugeCache[client].report
-              sleep 60
+              self[client].report
+              sleep(GAUGE_REPORT_INTERVAL)
             end
           end
         end
@@ -30,7 +31,7 @@ module Invoca
         private
 
         def cache_key_for_client(client)
-          [client.hostname, client.port].join(":")
+          [client.hostname, client.port].freeze
         end
       end
 
@@ -50,8 +51,10 @@ module Invoca
       # Reports all gauges that have been set in the cache as directly to the Client's parent method
       # Uses the client that was used to generate the cache
       def report
-        statsd_gauge_method_for_client = ::Statsd.instance_method(:gauge).bind(@client)
-        @cache.each { |metric, value| statsd_gauge_method_for_client.call(metric, value) }
+        @client.batch do |stats_batch|
+          statsd_gauge_method_for_batch = ::Statsd.instance_method(:gauge).bind(stats_batch)
+          @cache.each { |metric, value| statsd_gauge_method_for_batch.call(metric, value) }
+        end
       end
     end
   end

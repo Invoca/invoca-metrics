@@ -103,7 +103,7 @@ describe Invoca::Metrics::GaugeCache do
 
         it 'reports all gauges currently set as counts' do
           expect(::Statsd).to receive(:instance_method).with(:gauge).and_return(proc)
-          expect(proc).to receive(:bind).with(client).and_return(proc)
+          expect(proc).to receive(:bind).with(instance_of(Invoca::Metrics::Batch)).and_return(proc)
           gauges.each { |metric, value| expect(proc).to receive(:call).with(metric, value) }
           subject.report
         end
