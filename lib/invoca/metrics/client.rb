@@ -96,12 +96,29 @@ module Invoca
                     service_name:    Invoca::Metrics.default_client_config[:service_name],
                     server_name:     Invoca::Metrics.default_client_config[:server_name],
                     sub_server_name: Invoca::Metrics.default_client_config[:sub_server_name])
-          new(statsd_host || Client::STATSD_DEFAULT_HOSTNAME,
-              statsd_port || Client::STATSD_DEFAULT_PORT,
-              cluster_name,
-              service_name,
-              server_name,
-              sub_server_name)
+          effective_statsd_host = statsd_host || Client::STATSD_DEFAULT_HOSTNAME
+          effective_statsd_port = statsd_port || Client::STATSD_DEFAULT_PORT
+
+          client_key = [effective_statsd_host, effective_statsd_port, cluster_name, service_name, server_name, sub_server_name].freeze
+
+          client_cache[client_key] ||= new(
+            effective_statsd_host,
+            effective_statsd_port,
+            cluster_name,
+            service_name,
+            server_name,
+            sub_server_name
+          )
+        end
+
+        def reset_cache
+          @client_cache = {}
+        end
+
+        private
+
+        def client_cache
+          @client_cache ||= {}
         end
       end
 
