@@ -3,14 +3,18 @@
 module Invoca
   module Metrics
     class GaugeCache
-      GAUGE_REPORT_INTERVAL = 60
+      GAUGE_REPORT_INTERVAL_SECONDS = 60.seconds
 
       class << self
         def register(client)
           registered_gauge_caches[gauge_cache_key_for_client(client)] ||= new(client).tap do |gauge_cache|
             Thread.new do
-              gauge_cache.report
-              sleep(GAUGE_REPORT_INTERVAL)
+              next_time = Time.now.to_i
+              loop do
+                next_time = (next_time + GAUGE_REPORT_INTERVAL_SECONDS) / GAUGE_REPORT_INTERVAL_SECONDS * GAUGE_REPORT_INTERVAL_SECONDS
+                gauge_cache.report
+                sleep(next_time - Time.now.to_i)
+              end
             end
           end
         end
@@ -47,18 +51,15 @@ module Invoca
       # When the value is passed as nil, it merges the value in, which will then be skipped
       # during reporting of gauge metrics
       def set(metric, value)
-        @cache = @cache.merge(metric => value)
+        @cache[metric] = value
       end
 
       # Reports all gauges that have been set in the cache as directly to the Client's parent method
       # Uses the client that was used to generate the cache
       def report
         @client.batch do |stats_batch|
-          statsd_gauge_method_for_batch = ::Statsd.instance_method(:gauge).bind(stats_batch)
           @cache.each do |metric, value|
-            unless value.nil?
-              statsd_gauge_method_for_batch.call(metric, value)
-            end
+            stats_batch.gauge_without_caching(metric, value) if value
           end
         end
       end

@@ -22,8 +22,12 @@ describe Invoca::Metrics::GaugeCache do
         expect(Thread).to receive(:new) do |&block|
           expect(block.to_source.chomp).to eq(<<~EOS.chomp)
             proc do
-              gauge_cache.report
-              sleep(GAUGE_REPORT_INTERVAL)
+              next_time = Time.now.to_i
+              loop do
+                next_time = (((next_time + GAUGE_REPORT_INTERVAL_SECONDS) / GAUGE_REPORT_INTERVAL_SECONDS) * GAUGE_REPORT_INTERVAL_SECONDS)
+                gauge_cache.report
+                sleep((next_time - Time.now.to_i))
+              end
             end
           EOS
         end
@@ -78,16 +82,15 @@ describe Invoca::Metrics::GaugeCache do
         let(:gauges) { {} }
 
         it 'reports nothing' do
-          expect(client).to_not receive(:gauge)
+          expect(client).to_not receive(:gauge_without_caching)
           subject.report
         end
       end
 
       describe 'with gauges currently set' do
         it 'reports all gauges currently set as counts' do
-          expect(::Statsd).to receive(:instance_method).with(:gauge).and_return(proc)
-          expect(proc).to receive(:bind).with(instance_of(Invoca::Metrics::Batch)).and_return(proc)
-          gauges.each { |metric, value| expect(proc).to receive(:call).with(metric, value) }
+          expect(client).to receive(:batch).and_yield(proc)
+          gauges.each { |metric, value| expect(proc).to receive(:gauge_without_caching).with(metric, value) }
           subject.report
         end
       end
@@ -101,14 +104,13 @@ describe Invoca::Metrics::GaugeCache do
           }
         end
 
-        it 'omits reporting of nil gauges' do
-          expect(::Statsd).to receive(:instance_method).with(:gauge).and_return(proc)
-          expect(proc).to receive(:bind).with(instance_of(Invoca::Metrics::Batch)).and_return(proc)
+        it 'omits reporting of falsey gauges' do
+          expect(client).to receive(:batch).and_yield(proc)
           gauges.each do |metric, value|
             if value.nil?
-              expect(proc).to receive(:call).with(metric, value).never
+              expect(proc).to receive(:gauge_without_caching).with(metric, value).never
             else
-              expect(proc).to receive(:call).with(metric, value)
+              expect(proc).to receive(:gauge_without_caching).with(metric, value)
             end
           end
           subject.report

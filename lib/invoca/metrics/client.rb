@@ -30,12 +30,15 @@ module Invoca
         server_label
       end
 
-      def gauge(name, value)
+      def gauge_with_caching(name, value)
         if (args = metric_args(name, value, "gauge"))
           @gauge_cache.set(*args)
-          super(*args)
+          gauge_without_caching(*args)
         end
       end
+
+      alias gauge_without_caching gauge
+      alias gauge gauge_with_caching
 
       def count(name, value = 1)
         if (args = metric_args(name, value, "counter"))

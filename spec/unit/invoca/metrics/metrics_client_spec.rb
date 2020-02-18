@@ -66,7 +66,7 @@ describe Invoca::Metrics::Client do
       expect(metrics_client.port).to eq(5678)
     end
 
-    it "starts registers a gauge cache for itself" do
+    it "registers a gauge cache for itself" do
       Invoca::Metrics.statsd_host = "127.0.0.10"
       Invoca::Metrics.statsd_port = 1234
 
