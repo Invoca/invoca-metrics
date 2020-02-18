@@ -14,7 +14,13 @@ Gem::Specification.new do |spec|
 
   spec.metadata['allowed_push_host'] = "https://rubygems.org"
 
-  spec.files         = `git ls-files`.split($/)
+  spec.files         = [
+      Dir.glob('lib/**/*.rb'),
+      'README.md',
+      'LICENSE.txt',
+      'invoca-metrics.gemspec',
+  ].flatten
+
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
