@@ -3,17 +3,17 @@
 module Invoca
   module Metrics
     class GaugeCache
-      GAUGE_REPORT_INTERVAL_SECONDS = 60.seconds
+      GAUGE_REPORT_INTERVAL = 60.seconds
 
       class << self
         def register(client)
           registered_gauge_caches[gauge_cache_key_for_client(client)] ||= new(client).tap do |gauge_cache|
             Thread.new do
-              next_time = Time.now.to_i
+              next_time = Time.now.to_f
               loop do
-                next_time = (next_time + GAUGE_REPORT_INTERVAL_SECONDS) / GAUGE_REPORT_INTERVAL_SECONDS * GAUGE_REPORT_INTERVAL_SECONDS
+                next_time = (next_time + GAUGE_REPORT_INTERVAL) / GAUGE_REPORT_INTERVAL * GAUGE_REPORT_INTERVAL
                 gauge_cache.report
-                sleep(next_time - Time.now.to_i)
+                sleep(next_time - Time.now.to_f)
               end
             end
           end
