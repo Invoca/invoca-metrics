@@ -19,18 +19,11 @@ describe Invoca::Metrics::GaugeCache do
       end
 
       it 'kicks off a new thread for reporting the cached gauges' do
-        expect(Thread).to receive(:new) do |&block|
-          expect(block.to_source.chomp).to eq(<<~EOS.chomp)
-            proc do
-              next_time = Time.now.to_i
-              loop do
-                next_time = (((next_time + GAUGE_REPORT_INTERVAL_SECONDS) / GAUGE_REPORT_INTERVAL_SECONDS) * GAUGE_REPORT_INTERVAL_SECONDS)
-                gauge_cache.report
-                sleep((next_time - Time.now.to_i))
-              end
-            end
-          EOS
-        end
+        expect(cache).to receive(:report)
+        expect(described_class).to receive(:sleep).with(any_args)
+        expect(described_class).to receive(:loop) { |&loop_block| loop_block.call }
+        expect(Thread).to receive(:new) { |&thread_block| thread_block.call }
+
         expect(described_class.register(client)).to eq(cache)
       end
     end
