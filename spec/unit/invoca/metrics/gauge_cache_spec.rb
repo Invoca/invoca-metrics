@@ -3,37 +3,39 @@
 require 'sourcify'
 
 describe Invoca::Metrics::GaugeCache do
-  let(:client) { Invoca::Metrics::Client.new('localhost', '5678', 'test_cluster', 'test_service', 'test_label', 'sub_server') }
-
   describe 'class' do
+    let(:client) { Invoca::Metrics::Client.new('localhost', '5678', 'test_cluster', 'test_service', 'test_label', 'sub_server') }
     let(:cache) { double(described_class) }
 
     describe '#register' do
-      before(:each) do
-        expect(described_class).to receive(:new).and_return(cache)
-      end
-
       it 'initializes a new GaugeCache object for the client' do
-        expect(Thread).to receive(:new)
-        expect(described_class.register(client)).to eq(cache)
-      end
-
-      it 'kicks off a new thread for reporting the cached gauges' do
-        expect(cache).to receive(:report)
-        expect(described_class).to receive(:sleep).with(any_args)
-        expect(described_class).to receive(:loop) { |&loop_block| loop_block.call }
-        expect(Thread).to receive(:new) { |&thread_block| thread_block.call }
-
+        expect(described_class).to receive(:new).and_return(cache)
         expect(described_class.register(client)).to eq(cache)
       end
     end
   end
 
+  describe 'initialize' do
+    it 'kicks off a new thread for reporting the cached gauges' do
+      client = double(Invoca::Metrics::Client)
+
+      expect_any_instance_of(described_class).to receive(:report)
+      expect_any_instance_of(described_class).to receive(:sleep).with(any_args)
+      expect_any_instance_of(described_class).to receive(:loop) { |&loop_block| loop_block.call }
+      expect(Thread).to receive(:new) { |&thread_block| thread_block.call }
+
+      described_class.new(client)
+    end
+  end
+
   describe 'instance' do
+    let(:client) { Invoca::Metrics::Client.new('localhost', '5678', 'test_cluster', 'test_service', 'test_label', 'sub_server') }
     let(:metric) { 'test.gauge.metric' }
     let(:value)  { 1 }
 
     subject { described_class.new(client) }
+
+    before(:each) { allow(Thread).to receive(:new) }
 
     describe '#set' do
       it 'should store the value in the cache' do

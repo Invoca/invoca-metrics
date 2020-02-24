@@ -26,12 +26,24 @@ module Invoca
         @gauge_cache = GaugeCache.register(self)
       end
 
+      def gauge_cache_key
+        [
+          hostname,
+          port,
+          namespace,
+          server_name,
+          sub_server_name
+        ].freeze
+      end
+
       def server_name # For backwards compatibility
         server_label
       end
 
+      # This method will store the gauge value passed in so that it is reported every GAUGE_REPORT_INTERVAL
+      # seconds and post the gauge at the same time to avoid delay in gauges being
       def gauge_with_caching(name, value)
-        if (args = metric_args(name, value, "gauge"))
+        if (args = normalized_metric_name_and_value(name, value, "gauge"))
           @gauge_cache.set(*args)
           gauge_without_caching(*args)
         end
@@ -41,7 +53,7 @@ module Invoca
       alias gauge gauge_with_caching
 
       def count(name, value = 1)
-        if (args = metric_args(name, value, "counter"))
+        if (args = normalized_metric_name_and_value(name, value, "counter"))
           super(*args)
         end
       end
@@ -57,7 +69,7 @@ module Invoca
       end
 
       def set(name, value)
-        if (args = metric_args(name, value, nil))
+        if (args = normalized_metric_name_and_value(name, value, nil))
           super(*args)
         end
       end
@@ -127,7 +139,7 @@ module Invoca
 
       protected
 
-      def metric_args(name, value, stat_type)
+      def normalized_metric_name_and_value(name, value, stat_type)
         name.present? or raise ArgumentError, "Must specify a metric name."
         extended_name = [name, stat_type, @server_label, @sub_server_name].compact.join(STATSD_METRICS_SEPARATOR)
         if value
