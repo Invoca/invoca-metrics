@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    invoca-metrics (1.6.0.pre.2)
+    invoca-metrics (1.6.0.pre.3)
       activesupport (~> 4.0)
       rails (~> 4.0)
       statsd-ruby (~> 1.2.1)
