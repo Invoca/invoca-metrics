@@ -35,9 +35,11 @@ module Invoca
       end
 
       # Reports all gauges that have been set in the cache
+      # To avoid "RuntimeError: can't add a new key into hash during iteration" from occurring we are
+      # temporarily duplicating the cache to iterate and send the batch of metrics
       def report
         @client.batch do |stats_batch|
-          @cache.each do |metric, value|
+          @cache.dup.each do |metric, value|
             stats_batch.gauge_without_caching(metric, value) if value
           end
         end
