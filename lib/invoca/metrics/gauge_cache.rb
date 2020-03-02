@@ -49,11 +49,11 @@ module Invoca
 
       def start_reporting_thread
         Thread.new do
-          next_time = Time.now.to_f
+          next_time = Time.now.to_i
           loop do
-            next_time = ((next_time + GAUGE_REPORT_INTERVAL + 1) / GAUGE_REPORT_INTERVAL * GAUGE_REPORT_INTERVAL) - 1
+            next_time = (((next_time + GAUGE_REPORT_INTERVAL + 1) / GAUGE_REPORT_INTERVAL) * GAUGE_REPORT_INTERVAL) - 1
             report
-            sleep([next_time - Time.now.to_f, 0].min)
+            sleep([next_time - Time.now.to_i, 0].max)
           end
         end
       end
