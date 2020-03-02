@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'active_support'
 require 'active_support/core_ext'
 
@@ -5,6 +7,7 @@ require "invoca/metrics/version"
 require "invoca/metrics/client"
 require "invoca/metrics/direct_metric"
 require "invoca/metrics/batch"
+require "invoca/metrics/gauge_cache"
 
 module Invoca
   module Metrics

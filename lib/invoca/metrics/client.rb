@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'statsd'
 
 module Invoca
@@ -9,10 +11,9 @@ module Invoca
 
       MILLISECONDS_IN_SECOND = 1000
 
-      attr_reader :hostname, :port, :statsd_prefix, :server_label, :sub_server_name
+      attr_reader :hostname, :port, :statsd_prefix, :server_label, :sub_server_name, :gauge_cache
 
       def initialize(hostname, port, cluster_name, service_name, server_label, sub_server_name)
-
         @hostname        = hostname
         @port            = port
         @cluster_name    = cluster_name
@@ -22,20 +23,37 @@ module Invoca
 
         super(@hostname, @port)
         self.namespace = [@cluster_name, @service_name].compact.join(STATSD_METRICS_SEPARATOR).presence
+        @gauge_cache = GaugeCache.register(self)
+      end
+
+      def gauge_cache_key
+        [
+          hostname,
+          port,
+          namespace,
+          server_name,
+          sub_server_name
+        ].freeze
       end
 
       def server_name # For backwards compatibility
         server_label
       end
 
-      def gauge(name, value)
-        if args = metric_args(name, value, "gauge")
-          super(*args)
+      # This method will store the gauge value passed in so that it is reported every GAUGE_REPORT_INTERVAL
+      # seconds and post the gauge at the same time to avoid delay in gauges being
+      def gauge_with_caching(name, value)
+        if (args = normalized_metric_name_and_value(name, value, "gauge"))
+          @gauge_cache.set(*args)
+          gauge_without_caching(*args)
         end
       end
 
+      alias gauge_without_caching gauge
+      alias gauge gauge_with_caching
+
       def count(name, value = 1)
-        if args = metric_args(name, value, "counter")
+        if (args = normalized_metric_name_and_value(name, value, "counter"))
           super(*args)
         end
       end
@@ -51,7 +69,7 @@ module Invoca
       end
 
       def set(name, value)
-        if args = metric_args(name, value, nil)
+        if (args = normalized_metric_name_and_value(name, value, nil))
           super(*args)
         end
       end
@@ -73,11 +91,11 @@ module Invoca
         Metrics::Batch.new(self).easy(&block)
       end
 
-      def transmit(message, extra_data={})
-        # TODO - we need to wire up exception data to a monitoring service
+      def transmit(message, extra_data = {})
+        # TODO: - we need to wire up exception data to a monitoring service
       end
 
-      def time(stat, sample_rate=1)
+      def time(stat, sample_rate = 1)
         start = Time.now
         result = yield
         length_of_time = ((Time.now - start) * MILLISECONDS_IN_SECOND).round
@@ -93,18 +111,35 @@ module Invoca
                     service_name:    Invoca::Metrics.default_client_config[:service_name],
                     server_name:     Invoca::Metrics.default_client_config[:server_name],
                     sub_server_name: Invoca::Metrics.default_client_config[:sub_server_name])
-          new(statsd_host || Client::STATSD_DEFAULT_HOSTNAME,
-              statsd_port || Client::STATSD_DEFAULT_PORT,
-              cluster_name,
-              service_name,
-              server_name,
-              sub_server_name)
+          effective_statsd_host = statsd_host || Client::STATSD_DEFAULT_HOSTNAME
+          effective_statsd_port = statsd_port || Client::STATSD_DEFAULT_PORT
+
+          client_key = [effective_statsd_host, effective_statsd_port, cluster_name, service_name, server_name, sub_server_name].freeze
+
+          client_cache[client_key] ||= new(
+            effective_statsd_host,
+            effective_statsd_port,
+            cluster_name,
+            service_name,
+            server_name,
+            sub_server_name
+          )
+        end
+
+        def reset_cache
+          @client_cache = {}
+        end
+
+        private
+
+        def client_cache
+          @client_cache ||= {}
         end
       end
 
-    protected
+      protected
 
-      def metric_args(name, value, stat_type)
+      def normalized_metric_name_and_value(name, value, stat_type)
         name.present? or raise ArgumentError, "Must specify a metric name."
         extended_name = [name, stat_type, @server_label, @sub_server_name].compact.join(STATSD_METRICS_SEPARATOR)
         if value
@@ -122,7 +157,7 @@ module Invoca
         nil
       end
 
-    private
+      private
 
       def socket
         Thread.current.thread_variable_get(:statsd_socket) || Thread.current.thread_variable_set(:statsd_socket, new_socket)
@@ -134,4 +169,3 @@ module Invoca
     end
   end
 end
-

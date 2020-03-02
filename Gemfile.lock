@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    invoca-metrics (1.5.1)
+    invoca-metrics (1.6.0.pre.4)
       activesupport (~> 4.0)
       rails (~> 4.0)
       statsd-ruby (~> 1.2.1)
@@ -50,6 +50,8 @@ GEM
     crass (1.0.6)
     diff-lcs (1.3)
     erubis (2.7.0)
+    file-tail (1.2.0)
+      tins (~> 1.0)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
     i18n (0.9.5)
@@ -63,7 +65,7 @@ GEM
     mini_mime (1.0.2)
     mini_portile2 (2.4.0)
     minitest (5.14.0)
-    nokogiri (1.10.8)
+    nokogiri (1.10.9)
       mini_portile2 (~> 2.4.0)
     pry (0.12.2)
       coderay (~> 1.1.0)
@@ -112,6 +114,17 @@ GEM
     rspec_junit_formatter (0.4.1)
       rspec-core (>= 2, < 4, != 2.12.0)
     ruby-prof (1.2.0)
+    ruby2ruby (2.4.4)
+      ruby_parser (~> 3.1)
+      sexp_processor (~> 4.6)
+    ruby_parser (3.14.2)
+      sexp_processor (~> 4.9)
+    sexp_processor (4.14.1)
+    sourcify (0.5.0)
+      file-tail (>= 1.0.5)
+      ruby2ruby (>= 1.2.5)
+      ruby_parser (>= 2.0.5)
+      sexp_processor (>= 3.0.5)
     sprockets (4.0.0)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
@@ -120,8 +133,11 @@ GEM
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
     statsd-ruby (1.2.1)
+    sync (0.5.0)
     thor (1.0.1)
     thread_safe (0.3.6)
+    tins (1.24.1)
+      sync
     tzinfo (1.2.6)
       thread_safe (~> 0.1)
 
@@ -135,6 +151,7 @@ DEPENDENCIES
   rspec
   rspec_junit_formatter
   ruby-prof
+  sourcify
 
 BUNDLED WITH
    1.17.2

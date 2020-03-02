@@ -6,7 +6,7 @@ module Invoca
     class DirectMetric
       attr_reader :name, :value, :tick
 
-      def initialize(name,value, tick = nil)
+      def initialize(name, value, tick = nil)
         @name = name
         @value = value
         @tick = tick || self.class.rounded_tick
@@ -22,7 +22,7 @@ module Invoca
 
       class << self
         def report(metrics)
-          metrics_output = [metrics].flatten.map { |m| m.to_s }.join("\n") + "\n"
+          metrics_output = Array(metrics).map { |metric| "#{metric}\n" }.join
 
           send_to_metric_host(metrics_output)
         end
@@ -41,8 +41,8 @@ module Invoca
               new("#{metric_prefix}.count",    count,                    fixed_tick),
               new("#{metric_prefix}.max",      sorted_values[-1],        fixed_tick),
               new("#{metric_prefix}.min",      sorted_values[0],         fixed_tick),
-              new("#{metric_prefix}.median",   sorted_values[count*0.5], fixed_tick),
-              new("#{metric_prefix}.upper_90", sorted_values[count*0.9], fixed_tick)
+              new("#{metric_prefix}.median",   sorted_values[count * 0.5], fixed_tick),
+              new("#{metric_prefix}.upper_90", sorted_values[count * 0.9], fixed_tick)
             ]
           end
         end
