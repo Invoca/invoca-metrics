@@ -26,4 +26,3 @@ module Invoca
     end
   end
 end
-
