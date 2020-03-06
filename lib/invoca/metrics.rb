@@ -59,17 +59,20 @@ module Invoca
       extend ActiveSupport::Concern
 
       module ClassMethods
-        def metrics
-          @metrics ||= metrics_for(config_key: Invoca::Metrics.default_config_key)
+        @metrics_namespace = nil
+
+        def metrics_namespace(namespace)
+          @metrics_namespace = namespace
         end
 
-        def metrics_for(config_key:)
-          @metrics_for ||= {}
-          @metrics_for[config_key] ||=
-            begin
-              metrics_config = Invoca::Metrics.config[config_key] || {}
-              Client.metrics(Invoca::Metrics.default_client_config.merge(metrics_config))
-            end
+        def metrics
+          metrics_for(config_key: Invoca::Metrics.default_config_key)
+        end
+
+        def metrics_for(config_key:, namespace: nil)
+          metrics_config = Invoca::Metrics.config[config_key] || {}
+          namespace_override = { namespace: namespace || @metrics_namespace }.compact
+          Client.metrics(Invoca::Metrics.default_client_config.merge(metrics_config).merge(namespace_override))
         end
       end
 
@@ -77,8 +80,8 @@ module Invoca
         self.class.metrics
       end
 
-      def metrics_for(config_key:)
-        self.class.metrics_for(config_key: config_key)
+      def metrics_for(config_key:, namespace: nil)
+        self.class.metrics_for(config_key: config_key, namespace: namespace)
       end
     end
   end

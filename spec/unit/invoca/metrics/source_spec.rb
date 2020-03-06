@@ -80,6 +80,25 @@ describe Invoca::Metrics::Source do
         }
       end
 
+      describe "#metrics_namespace" do
+        after(:each) { subject.class.metrics_namespace(nil) }
+
+        it "creates a metric client with the provided namespace" do
+          subject.class.metrics_namespace("different_namespace")
+          expect(subject.metrics.namespace).to eq("different_namespace")
+        end
+
+        it "returns a different metric client when a different namespace is provided" do
+          initial_client = subject.metrics
+          subject.class.metrics_namespace("different_namespace")
+          namespaced_client = subject.metrics
+
+          expect(initial_client).to_not be(namespaced_client)
+          expect(initial_client.namespace).to eq("unicorn")
+          expect(namespaced_client.namespace).to eq("different_namespace")
+        end
+      end
+
       describe "#metrics" do
         it "returns metrics client for default_config_key" do
           expect(subject.metrics.sub_server_name).to eq("default_sub_server_name")
@@ -91,6 +110,20 @@ describe Invoca::Metrics::Source do
         it "returns metrics client for given config_key" do
           expect(subject.metrics_for(config_key: :region).sub_server_name).to eq("default_sub_server_name")
           expect(subject.metrics_for(config_key: :region).hostname).to eq("255.0.0.456")
+        end
+
+        it "returns metrics client for given config_key with namespace provided" do
+          expect(subject.metrics_for(config_key: :region, namespace: "different_namespace").sub_server_name).to eq("default_sub_server_name")
+          expect(subject.metrics_for(config_key: :region, namespace: "different_namespace").hostname).to eq("255.0.0.456")
+          expect(subject.metrics_for(config_key: :region, namespace: "different_namespace").namespace).to eq("different_namespace")
+        end
+
+        it "returns the same client when given the same parameters" do
+          namespaceless_client = subject.metrics_for(config_key: :region)
+          namespaced_client    = subject.metrics_for(config_key: :region, namespace: "different_namespace")
+
+          expect(subject.metrics_for(config_key: :region)).to be(namespaceless_client)
+          expect(subject.metrics_for(config_key: :region, namespace: "different_namespace")).to be(namespaced_client)
         end
       end
     end
