@@ -11,7 +11,15 @@ module Invoca
       # @param [Invoca::Metrics::Client] client requires a configured Client instance
       # @param [Statsd::Batch] statsd_batch requires a configured Batch instance
       def initialize(client, statsd_batch)
-        super(client.hostname, client.port, client.cluster_name, client.service_name, client.server_label, client.sub_server_name)
+        super(
+          hostname: client.hostname,
+          port: client.port,
+          cluster_name: client.cluster_name,
+          service_name: client.service_name,
+          server_label: client.server_label,
+          sub_server_name: client.sub_server_name,
+          namespace: client.namespace
+        )
         @statsd_client = statsd_batch
       end
 

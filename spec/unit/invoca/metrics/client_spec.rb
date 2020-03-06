@@ -13,11 +13,39 @@ describe Invoca::Metrics::Client do
       service_name    = "test_service"
       server_name     = "test_server"
       sub_server_name = "test_sub_server"
-      metrics_client  = Invoca::Metrics::Client.new(custom_host, custom_port, cluster_name, service_name, server_name, sub_server_name)
+
+      metrics_client = Invoca::Metrics::Client.new(
+        hostname:        custom_host,
+        port:            custom_port,
+        cluster_name:    cluster_name,
+        service_name:    service_name,
+        server_label:    server_name,
+        sub_server_name: sub_server_name
+      )
 
       expect(metrics_client.hostname).to eq(custom_host)
       expect(metrics_client.port).to eq(custom_port)
       expect(metrics_client.namespace).to eq("test_cluster.test_service")
+    end
+
+    it "properly constructs with a namespace provided" do
+      custom_host     = "127.0.0.2"
+      custom_port     = 8300
+      namespace       = "separate_namespace"
+
+      metrics_client = Invoca::Metrics::Client.new(
+        hostname:        custom_host,
+        port:            custom_port,
+        cluster_name:    "test_cluster",
+        service_name:    "test_service",
+        server_label:    "test_server",
+        sub_server_name: "test_sub_server",
+        namespace:       namespace
+      )
+
+      expect(metrics_client.hostname).to eq(custom_host)
+      expect(metrics_client.port).to eq(custom_port)
+      expect(metrics_client.namespace).to eq(namespace)
     end
 
     it "properly construct with defaults such that statsd are enabled" do

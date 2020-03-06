@@ -19,20 +19,19 @@ module Invoca
                     cluster_name:    Invoca::Metrics.default_client_config[:cluster_name],
                     service_name:    Invoca::Metrics.default_client_config[:service_name],
                     server_name:     Invoca::Metrics.default_client_config[:server_name],
-                    sub_server_name: Invoca::Metrics.default_client_config[:sub_server_name])
-          effective_statsd_host = statsd_host || STATSD_DEFAULT_HOSTNAME
-          effective_statsd_port = statsd_port || STATSD_DEFAULT_PORT
+                    sub_server_name: Invoca::Metrics.default_client_config[:sub_server_name],
+                    namespace:       nil)
+          config = {
+            hostname:        statsd_host || STATSD_DEFAULT_HOSTNAME,
+            port:            statsd_port || STATSD_DEFAULT_PORT,
+            cluster_name:    cluster_name,
+            service_name:    service_name,
+            server_label:    server_name,
+            sub_server_name: sub_server_name,
+            namespace:       namespace
+          }.freeze
 
-          client_key = [effective_statsd_host, effective_statsd_port, cluster_name, service_name, server_name, sub_server_name].freeze
-
-          client_cache[client_key] ||= new(
-            effective_statsd_host,
-            effective_statsd_port,
-            cluster_name,
-            service_name,
-            server_name,
-            sub_server_name
-          )
+          client_cache[config] ||= new(config)
         end
 
         def reset_cache
@@ -49,7 +48,7 @@ module Invoca
       attr_reader :hostname, :port, :server_label, :sub_server_name, :cluster_name, :service_name, :gauge_cache
       delegate :batch_size, :namespace, to: :statsd_client
 
-      def initialize(hostname, port, cluster_name, service_name, server_label, sub_server_name)
+      def initialize(hostname:, port:, cluster_name: nil, service_name: nil, server_label: nil, sub_server_name: nil, namespace: nil)
         @hostname        = hostname
         @port            = port
         @cluster_name    = cluster_name
@@ -58,7 +57,7 @@ module Invoca
         @sub_server_name = sub_server_name
 
         @statsd_client = StatsdWithPersistentConnection.new(@hostname, @port)
-        @statsd_client.namespace = [@cluster_name, @service_name].compact.join(STATSD_METRICS_SEPARATOR).presence
+        @statsd_client.namespace = namespace || [@cluster_name, @service_name].compact.join(STATSD_METRICS_SEPARATOR).presence
 
         @gauge_cache = GaugeCache.register(gauge_cache_key, @statsd_client)
       end

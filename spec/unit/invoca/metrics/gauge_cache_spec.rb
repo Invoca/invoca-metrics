@@ -6,8 +6,17 @@ describe Invoca::Metrics::GaugeCache do
   let(:statsd) { double(Invoca::Metrics::StatsdWithPersistentConnection) }
 
   describe 'class' do
-    let(:client) { Invoca::Metrics::Client.new('localhost', '5678', 'test_cluster', 'test_service', 'test_label', 'sub_server') }
     let(:cache) { double(described_class) }
+    let(:client) do
+      Invoca::Metrics::Client.new(
+        hostname: 'localhost',
+        port: '5678',
+        cluster_name: 'test_cluster',
+        service_name: 'test_service',
+        server_label: 'test_label',
+        sub_server_name: 'sub_server'
+      )
+    end
 
     describe '#register' do
       it 'initializes a new GaugeCache object for the client' do
