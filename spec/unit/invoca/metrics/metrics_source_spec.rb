@@ -41,24 +41,36 @@ describe Invoca::Metrics::Source do
       metrics.set(name, value)
     end
 
-    def transmit_trigger(name, extra_data)
-      metrics.transmit(name, extra_data)
-    end
+    # TODO: - implement transmit method
+    # def transmit_trigger(name, extra_data)
+    #   metrics.transmit(name, extra_data)
+    # end
   end
 
   describe "as a module mixin" do
+    let(:sub_server_name) { nil }
+    let(:config) { {} }
+    let(:default_config_key) { nil }
+
+    subject { ExampleMetricTester.new }
+
     before(:each) do
       stub_metrics_as_production_unicorn
-      @metric_tester = ExampleMetricTester.new
-      ExampleMetricTester.clear_metrics
-      @metric_tester.metrics.extend TrackSentMessage
+
+      Invoca::Metrics.sub_server_name = sub_server_name
+      Invoca::Metrics.config = config
+      Invoca::Metrics.default_config_key = default_config_key
+
+      subject.metrics.extend(ExposeStatsdClient)
     end
 
+    after(:each) { ExampleMetricTester.clear_metrics }
+
     describe "metrics clients" do
-      before(:each) do
-        ExampleMetricTester.clear_metrics
-        Invoca::Metrics.sub_server_name = "default_sub_server_name"
-        Invoca::Metrics.config = {
+      let(:sub_server_name) { "default_sub_server_name" }
+      let(:default_config_key) { :deploy_group }
+      let(:config) do
+        {
           deploy_group: {
             statsd_host: "255.0.0.123"
           },
@@ -66,71 +78,71 @@ describe Invoca::Metrics::Source do
             statsd_host: "255.0.0.456"
           }
         }
-        Invoca::Metrics.default_config_key = :deploy_group
       end
 
       describe "#metrics" do
         it "returns metrics client for default_config_key" do
-          metrics_client = @metric_tester.metrics
-          expect(metrics_client.sub_server_name).to eq("default_sub_server_name")
-          expect(metrics_client.hostname).to eq("255.0.0.123")
+          expect(subject.metrics.sub_server_name).to eq("default_sub_server_name")
+          expect(subject.metrics.hostname).to eq("255.0.0.123")
         end
       end
 
       describe "#metrics_for" do
         it "returns metrics client for given config_key" do
-          metrics_client = @metric_tester.metrics_for(config_key: :region)
-          expect(metrics_client.sub_server_name).to eq("default_sub_server_name")
-          expect(metrics_client.hostname).to eq("255.0.0.456")
+          expect(subject.metrics_for(config_key: :region).sub_server_name).to eq("default_sub_server_name")
+          expect(subject.metrics_for(config_key: :region).hostname).to eq("255.0.0.456")
         end
       end
     end
 
     it "provides a gauge method" do
-      @metric_tester.gauge_trigger("Test.anything", 5)
-      expect(@metric_tester.metrics.sent_message).to eq("unicorn.Test.anything.gauge.prod-fe1:5|g")
+      expect(subject.metrics.statsd_client).to receive(:gauge).with("Test.anything.gauge.prod-fe1", 5)
+      subject.gauge_trigger("Test.anything", 5)
     end
 
     it "provides a counter method" do
-      @metric_tester.counter_trigger("Test.anything")
-      expect(@metric_tester.metrics.sent_message).to eq("unicorn.Test.anything.counter.prod-fe1:1|c")
+      expect(subject.metrics.statsd_client).to receive(:count).with("Test.anything.counter.prod-fe1", 1)
+      subject.counter_trigger("Test.anything")
     end
 
     it "provides a timer method" do
-      @metric_tester.timer_trigger("Test.anything", 15)
-      expect(@metric_tester.metrics.sent_message).to eq("unicorn.Test.anything.timer.prod-fe1:15|ms")
+      expect(subject.metrics.statsd_client).to receive(:timing).with("Test.anything.timer.prod-fe1", 15)
+      subject.timer_trigger("Test.anything", 15)
 
-      @metric_tester.timer_trigger("Test.anything") { 1 + 2 }
-      expect(@metric_tester.metrics.sent_messages.last).to match(/unicorn.prod-fe1.Test.anything.timer:[0-9]*|ms/)
+      expect(subject.metrics.statsd_client).to receive(:timing).with("Test.anything.timer.prod-fe1", kind_of(Numeric), 1)
+      subject.timer_trigger("Test.anything") { 1 + 2 }
     end
 
     it "provides an increment method" do
-      @metric_tester.increment_trigger("Test.anything")
-      expect(@metric_tester.metrics.sent_message).to eq("unicorn.Test.anything.counter.prod-fe1:1|c")
+      expect(subject.metrics.statsd_client).to receive(:count).with("Test.anything.counter.prod-fe1", 1)
+      subject.increment_trigger("Test.anything")
     end
 
     it "provides a decrement method" do
-      @metric_tester.decrement_trigger("Test.anything")
-      expect(@metric_tester.metrics.sent_message).to eq("unicorn.Test.anything.counter.prod-fe1:-1|c")
+      expect(subject.metrics.statsd_client).to receive(:count).with("Test.anything.counter.prod-fe1", -1)
+      subject.decrement_trigger("Test.anything")
     end
 
     it "provides a batch method" do
-      metric_tester = ExampleMetricTester.new
-      metric_tester.metrics.extend TrackSentMessage
-      metric_tester.batch_trigger do |batch|
+      subject.batch_trigger do |batch|
+        batch.extend(ExposeStatsdClient)
+
+        expect(batch.statsd_client).to receive(:count).with("Test.stat1.counter.prod-fe1", 1)
+        expect(batch.statsd_client).to receive(:count).with("Test.stat2.counter.prod-fe1", 2)
+
         batch.count("Test.stat1", 1)
         batch.count("Test.stat2", 2)
       end
-      expect(metric_tester.metrics.sent_message).to eq("unicorn.Test.stat1.counter.prod-fe1:1|c\nunicorn.Test.stat2.counter.prod-fe1:2|c")
     end
 
     it "provides a set method" do
-      @metric_tester.set_trigger("Calls.in.otherstattype", 5)
-      expect(@metric_tester.metrics.sent_message).to eq("unicorn.Calls.in.otherstattype.prod-fe1:5|s")
+      expect(subject.metrics.statsd_client).to receive(:set).with("Calls.in.otherstattype.prod-fe1", 5)
+      subject.set_trigger("Calls.in.otherstattype", 5)
     end
 
-    it "provides a transmit method" do
-      expect(@metric_tester).to respond_to(:transmit_trigger)
-    end
+    # TODO: - implement transmit method
+    # it "provides a transmit method" do
+    #   expect(subject).to respond_to(:transmit_trigger)
+    # end
   end
 end

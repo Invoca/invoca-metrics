@@ -1,19 +1,18 @@
 # frozen_string_literal: true
 
+require 'active_support'
+require 'active_support/core_ext/module/delegation'
+
 module Invoca
   module Metrics
     class Batch < Client
-      attr_accessor :batch_size
+      delegate :batch_size, :batch_size=, to: :statsd_client
 
-      # @param [Statsd] requires a configured Client instance
-      def initialize(client)
-        @client          = client
-        @server_label    = @client.server_label
-        @sub_server_name = @client.sub_server_name
-        @batch_size      = @client.batch_size
-        @gauge_cache     = @client.gauge_cache
-        self.namespace   = @client.namespace
-        @backlog         = []
+      # @param [Invoca::Metrics::Client] client requires a configured Client instance
+      # @param [Statsd::Batch] statsd_batch requires a configured Batch instance
+      def initialize(client, statsd_batch)
+        super(client.hostname, client.port, client.cluster_name, client.service_name, client.server_label, client.sub_server_name)
+        @statsd_client = statsd_batch
       end
 
       # @yields [Batch] yields itself
@@ -21,26 +20,10 @@ module Invoca
       # A convenience method to ensure that data is not lost in the event of an
       # exception being thrown. Batches will be transmitted on the parent socket
       # as soon as the batch is full, and when the block finishes.
-      def easy
+      def ensure_send
         yield self
       ensure
-        flush
-      end
-
-      def flush
-        unless @backlog.empty?
-          @client.send_to_socket @backlog.join("\n")
-          @backlog = []
-        end
-      end
-
-      protected
-
-      def send_to_socket(message)
-        @backlog << message
-        if @backlog.size >= @batch_size
-          flush
-        end
+        statsd_client.flush
       end
     end
   end
