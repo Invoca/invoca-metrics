@@ -5,6 +5,16 @@ require 'statsd'
 module Invoca
   module Metrics
     class Statsd < ::Statsd
+      MILLISECONDS_IN_SECOND = 1000
+
+      def time(stat, sample_rate = 1)
+        start = Time.now
+        result = yield
+        length_of_time = ((Time.now - start) * MILLISECONDS_IN_SECOND).round
+        timing(stat, length_of_time, sample_rate)
+        [result, length_of_time]
+      end
+
       def send_to_socket(message)
         # self.class.logger&.debug { "Statsd: #{message}" }
         socket.send(message, 0)

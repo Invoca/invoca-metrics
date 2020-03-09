@@ -281,6 +281,7 @@ describe Invoca::Metrics::Client do
 
         it "return the value from the block" do
           expect(subject.timer("unicorn.test_metric.prod-fe1") { (1 + 1) }).to eq(2)
+          expect(subject.timer("unicorn.test_metric.prod-fe1") { ([1] + [1]) }).to eq([1, 1])
         end
 
         it "return both the value from the block and the timing if specified" do

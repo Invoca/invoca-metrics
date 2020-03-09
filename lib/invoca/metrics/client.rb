@@ -10,8 +10,6 @@ module Invoca
       STATSD_DEFAULT_PORT = 8125
       STATSD_METRICS_SEPARATOR = '.'
 
-      MILLISECONDS_IN_SECOND = 1000
-
       class << self
         delegate :logger, :logger=, to: ::Statsd
 
@@ -48,7 +46,7 @@ module Invoca
       end
 
       attr_reader :hostname, :port, :server_label, :sub_server_name, :cluster_name, :service_name, :gauge_cache
-      delegate :batch_size, :namespace, to: :statsd_client
+      delegate :batch_size, :namespace, :timing, :time, to: :statsd_client
 
       def initialize(hostname:, port:, cluster_name: nil, service_name: nil, server_label: nil, sub_server_name: nil, namespace: nil)
         @hostname        = hostname
@@ -117,10 +115,10 @@ module Invoca
         name_and_type = [name, "timer", server_label].join(STATSD_METRICS_SEPARATOR)
 
         if milliseconds.nil?
-          result, block_time = statsd_client.time(name_and_type, &block)
+          result, block_time = time(name_and_type, &block)
           return_timing ? [result, block_time] : result
         else
-          statsd_client.timing(name_and_type, milliseconds)
+          timing(name_and_type, milliseconds)
         end
       end
 
@@ -133,14 +131,6 @@ module Invoca
       # TODO: - implement transmit method
       def transmit(message, extra_data = {})
         # TODO: - we need to wire up exception data to a monitoring service
-      end
-
-      def time(stat, sample_rate = 1)
-        start = Time.now
-        result = yield
-        length_of_time = ((Time.now - start) * MILLISECONDS_IN_SECOND).round
-        statsd_client.timing(stat, length_of_time, sample_rate)
-        [result, length_of_time]
       end
 
       private
