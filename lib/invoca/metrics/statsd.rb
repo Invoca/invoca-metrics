@@ -16,6 +16,7 @@ module Invoca
       private
 
       # Socket connection should be Thread local and not Fiber local
+      # Can't use `Thread.current[:statsd_client] ||=` because that will be fiber-local as well.
       def socket
         Thread.current.thread_variable_get(:statsd_socket) || Thread.current.thread_variable_set(:statsd_socket, new_socket)
       end
