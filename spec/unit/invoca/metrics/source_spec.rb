@@ -60,8 +60,6 @@ describe Invoca::Metrics::Source do
       Invoca::Metrics.sub_server_name = sub_server_name
       Invoca::Metrics.config = config
       Invoca::Metrics.default_config_key = default_config_key
-
-      subject.metrics.extend(ExposeStatsdClient)
     end
 
     after(:each) { ExampleMetricTester.clear_metrics }
@@ -129,39 +127,37 @@ describe Invoca::Metrics::Source do
     end
 
     it "provides a gauge method" do
-      expect(subject.metrics.statsd_client).to receive(:gauge).with("Test.anything.gauge.prod-fe1", 5)
+      expect(subject.metrics.instance_variable_get(:@statsd_client)).to receive(:gauge).with("Test.anything.gauge.prod-fe1", 5)
       subject.gauge_trigger("Test.anything", 5)
     end
 
     it "provides a counter method" do
-      expect(subject.metrics.statsd_client).to receive(:count).with("Test.anything.counter.prod-fe1", 1)
+      expect(subject.metrics.instance_variable_get(:@statsd_client)).to receive(:count).with("Test.anything.counter.prod-fe1", 1)
       subject.counter_trigger("Test.anything")
     end
 
     it "provides a timer method" do
-      expect(subject.metrics.statsd_client).to receive(:timing).with("Test.anything.timer.prod-fe1", 15)
+      expect(subject.metrics.instance_variable_get(:@statsd_client)).to receive(:timing).with("Test.anything.timer.prod-fe1", 15)
       subject.timer_trigger("Test.anything", 15)
 
-      expect(subject.metrics.statsd_client).to receive(:timing).with("Test.anything.timer.prod-fe1", kind_of(Numeric), 1)
+      expect(subject.metrics.instance_variable_get(:@statsd_client)).to receive(:timing).with("Test.anything.timer.prod-fe1", kind_of(Numeric), 1)
       subject.timer_trigger("Test.anything") { 1 + 2 }
     end
 
     it "provides an increment method" do
-      expect(subject.metrics.statsd_client).to receive(:count).with("Test.anything.counter.prod-fe1", 1)
+      expect(subject.metrics.instance_variable_get(:@statsd_client)).to receive(:count).with("Test.anything.counter.prod-fe1", 1)
       subject.increment_trigger("Test.anything")
     end
 
     it "provides a decrement method" do
-      expect(subject.metrics.statsd_client).to receive(:count).with("Test.anything.counter.prod-fe1", -1)
+      expect(subject.metrics.instance_variable_get(:@statsd_client)).to receive(:count).with("Test.anything.counter.prod-fe1", -1)
       subject.decrement_trigger("Test.anything")
     end
 
     it "provides a batch method" do
       subject.batch_trigger do |batch|
-        batch.extend(ExposeStatsdClient)
-
-        expect(batch.statsd_client).to receive(:count).with("Test.stat1.counter.prod-fe1", 1)
-        expect(batch.statsd_client).to receive(:count).with("Test.stat2.counter.prod-fe1", 2)
+        expect(batch.instance_variable_get(:@statsd_client)).to receive(:count).with("Test.stat1.counter.prod-fe1", 1)
+        expect(batch.instance_variable_get(:@statsd_client)).to receive(:count).with("Test.stat2.counter.prod-fe1", 2)
 
         batch.count("Test.stat1", 1)
         batch.count("Test.stat2", 2)
@@ -169,7 +165,7 @@ describe Invoca::Metrics::Source do
     end
 
     it "provides a set method" do
-      expect(subject.metrics.statsd_client).to receive(:set).with("Calls.in.otherstattype.prod-fe1", 5)
+      expect(subject.metrics.instance_variable_get(:@statsd_client)).to receive(:set).with("Calls.in.otherstattype.prod-fe1", 5)
       subject.set_trigger("Calls.in.otherstattype", 5)
     end
 

@@ -123,24 +123,23 @@ describe Invoca::Metrics::Client do
       before(:each) do
         stub_metrics_as_production_unicorn
         Invoca::Metrics.sub_server_name = sub_server_name
-        subject.extend(ExposeStatsdClient)
-        expect(subject.statsd_client.prefix).to eq('unicorn.')
+        expect(subject.instance_variable_get(:@statsd_client).prefix).to eq('unicorn.')
       end
 
       it "use correct format for gauge" do
-        expect(subject.statsd_client).to receive(:gauge).with("my_test_metric.gauge.prod-fe1", 5)
+        expect(subject.instance_variable_get(:@statsd_client)).to receive(:gauge).with("my_test_metric.gauge.prod-fe1", 5)
 
         subject.gauge("my_test_metric", 5)
         expect(subject.gauge_cache.cache).to include("my_test_metric.gauge.prod-fe1" => 5)
       end
 
       it "use correct format for timer" do
-        expect(subject.statsd_client).to receive(:timing).with("my_test_metric.timer.prod-fe1", 1000)
+        expect(subject.instance_variable_get(:@statsd_client)).to receive(:timing).with("my_test_metric.timer.prod-fe1", 1000)
         subject.timer("my_test_metric", 1000)
       end
 
       it "use correct format for counter" do
-        expect(subject.statsd_client).to receive(:count).with("my_test_metric.counter.prod-fe1", 1)
+        expect(subject.instance_variable_get(:@statsd_client)).to receive(:count).with("my_test_metric.counter.prod-fe1", 1)
         subject.counter("my_test_metric", 1)
       end
 
@@ -149,7 +148,7 @@ describe Invoca::Metrics::Client do
 
         it "uses the correct formatting" do
           subject = Invoca::Metrics::Client.metrics
-          expect(subject.statsd_client).to receive(:count).with("my_test_metric.counter.prod-fe1.9000", 1)
+          expect(subject.instance_variable_get(:@statsd_client)).to receive(:count).with("my_test_metric.counter.prod-fe1.9000", 1)
           subject.counter("my_test_metric", 1)
         end
       end
@@ -158,24 +157,23 @@ describe Invoca::Metrics::Client do
     describe "in the staging environment" do
       before(:each) do
         stub_metrics_as_staging_unicorn
-        subject.extend(ExposeStatsdClient)
-        expect(subject.statsd_client.prefix).to eq('staging.unicorn.')
+        expect(subject.instance_variable_get(:@statsd_client).prefix).to eq('staging.unicorn.')
       end
 
       it "use correct format for gauge" do
-        expect(subject.statsd_client).to receive(:gauge).with("my_test_metric.gauge.staging-full-fe1", 5)
+        expect(subject.instance_variable_get(:@statsd_client)).to receive(:gauge).with("my_test_metric.gauge.staging-full-fe1", 5)
 
         subject.gauge("my_test_metric", 5)
         expect(subject.gauge_cache.cache).to include("my_test_metric.gauge.staging-full-fe1" => 5)
       end
 
       it "use correct format for timer" do
-        expect(subject.statsd_client).to receive(:timing).with("my_test_metric.timer.staging-full-fe1", 1000)
+        expect(subject.instance_variable_get(:@statsd_client)).to receive(:timing).with("my_test_metric.timer.staging-full-fe1", 1000)
         subject.timer("my_test_metric", 1000)
       end
 
       it "use correct format for counter" do
-        expect(subject.statsd_client).to receive(:count).with("my_test_metric.counter.staging-full-fe1", 1)
+        expect(subject.instance_variable_get(:@statsd_client)).to receive(:count).with("my_test_metric.counter.staging-full-fe1", 1)
         subject.counter("my_test_metric", 1)
       end
     end
@@ -183,12 +181,11 @@ describe Invoca::Metrics::Client do
     describe "validations" do
       before(:each) do
         stub_metrics_as_production_unicorn
-        subject.extend(ExposeStatsdClient)
       end
 
       describe "gauge" do
         it "send the metric to the statsd client" do
-          expect(subject.statsd_client).to receive(:gauge).with("my_test_metric.gauge.prod-fe1", 5)
+          expect(subject.instance_variable_get(:@statsd_client)).to receive(:gauge).with("my_test_metric.gauge.prod-fe1", 5)
 
           subject.gauge("my_test_metric", 5)
           expect(subject.gauge_cache.cache).to include("my_test_metric.gauge.prod-fe1" => 5)
@@ -203,7 +200,7 @@ describe Invoca::Metrics::Client do
 
       describe "counter" do
         it "send the metric to the socket" do
-          expect(subject.statsd_client).to receive(:count).with("my_test_metric.counter.prod-fe1", 1)
+          expect(subject.instance_variable_get(:@statsd_client)).to receive(:count).with("my_test_metric.counter.prod-fe1", 1)
           subject.counter("my_test_metric", 1)
         end
 
@@ -216,7 +213,7 @@ describe Invoca::Metrics::Client do
 
       describe "increment" do
         it "send the metric to the socket" do
-          expect(subject.statsd_client).to receive(:count).with("test_metric.counter.prod-fe1", 1)
+          expect(subject.instance_variable_get(:@statsd_client)).to receive(:count).with("test_metric.counter.prod-fe1", 1)
           subject.increment("test_metric")
         end
 
@@ -229,7 +226,7 @@ describe Invoca::Metrics::Client do
 
       describe "decrement" do
         it "send the metric to the socket" do
-          expect(subject.statsd_client).to receive(:count).with("test_metric.counter.prod-fe1", -1)
+          expect(subject.instance_variable_get(:@statsd_client)).to receive(:count).with("test_metric.counter.prod-fe1", -1)
           subject.decrement("test_metric")
         end
 
@@ -242,7 +239,7 @@ describe Invoca::Metrics::Client do
 
       describe "set" do
         it "send the metric to the socket" do
-          expect(subject.statsd_client).to receive(:set).with("login.prod-fe1", "joe@example.com")
+          expect(subject.instance_variable_get(:@statsd_client)).to receive(:set).with("login.prod-fe1", "joe@example.com")
           subject.set("login", "joe@example.com")
         end
 
@@ -255,17 +252,17 @@ describe Invoca::Metrics::Client do
 
       describe "timer" do
         it "send a specified millisecond metric value to the socket" do
-          expect(subject.statsd_client).to receive(:timing).with("test_metric.timer.prod-fe1", 15000)
+          expect(subject.instance_variable_get(:@statsd_client)).to receive(:timing).with("test_metric.timer.prod-fe1", 15000)
           subject.timer("test_metric", 15000)
         end
 
         it "send a millisecond metric value based on block to the socket" do
-          expect(subject.statsd_client).to receive(:timing).with("test_metric.timer.prod-fe1", kind_of(Numeric), 1)
+          expect(subject.instance_variable_get(:@statsd_client)).to receive(:timing).with("test_metric.timer.prod-fe1", kind_of(Numeric), 1)
           subject.timer("test_metric") { (1 + 1) }
         end
 
         it "send correct second metric value based on block" do
-          allow(subject.statsd_client).to receive(:time).and_return([nil, 5000])
+          allow(subject.instance_variable_get(:@statsd_client)).to receive(:time).and_return([nil, 5000])
           subject.timer("unicorn.test_metric.prod-fe1") { (1 + 1) }
         end
 
@@ -274,7 +271,7 @@ describe Invoca::Metrics::Client do
         end
 
         it "return both the value from the block and the timing if specified" do
-          allow(subject.statsd_client).to receive(:time).and_return([2, 5000])
+          allow(subject.instance_variable_get(:@statsd_client)).to receive(:time).and_return([2, 5000])
           result_from_block, timing = subject.timer("unicorn.test_metric.prod-fe1", return_timing: true) do
             (1 + 1)
           end

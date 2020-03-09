@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'expose_statsd_client'
 require_relative 'track_sent_message'
 
 module MetricsTestHelpers
