@@ -105,6 +105,19 @@ describe Invoca::Metrics::Client do
     end
   end
 
+  describe "#logger" do
+    it "allows assignment of Statsd logger through Invoca::Metrics::Client" do
+      logger = Logger.new(STDOUT)
+      expect(described_class.logger).to_not be(logger)
+      expect(described_class.logger).to be(::Statsd.logger)
+
+      described_class.logger = logger
+
+      expect(described_class.logger).to be(logger)
+      expect(::Statsd.logger).to be(logger)
+    end
+  end
+
   describe "#server_name" do
     it "return server_label for backwards compatibility" do
       stub_metrics_as_production_unicorn

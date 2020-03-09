@@ -13,6 +13,8 @@ module Invoca
       MILLISECONDS_IN_SECOND = 1000
 
       class << self
+        delegate :logger, :logger=, to: ::Statsd
+
         # Default values are required for backwards compatibility
         def metrics(statsd_host:     Invoca::Metrics.default_client_config[:statsd_host],
                     statsd_port:     Invoca::Metrics.default_client_config[:statsd_port],
@@ -46,7 +48,7 @@ module Invoca
       end
 
       attr_reader :hostname, :port, :server_label, :sub_server_name, :cluster_name, :service_name, :gauge_cache
-      delegate :batch_size, :namespace, :logger, :logger=, to: :statsd_client
+      delegate :batch_size, :namespace, to: :statsd_client
 
       def initialize(hostname:, port:, cluster_name: nil, service_name: nil, server_label: nil, sub_server_name: nil, namespace: nil)
         @hostname        = hostname
