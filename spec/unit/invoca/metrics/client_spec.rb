@@ -6,7 +6,7 @@ describe Invoca::Metrics::Client do
   describe "initialization" do
     before(:each) { stub_metrics_as_production_unicorn }
 
-    it "properly construct with params and statsd both turned on" do
+    it "properly constructs with params and statsd both turned on" do
       custom_host     = "127.0.0.2"
       custom_port     = 8300
       cluster_name    = "test_cluster"
@@ -48,14 +48,14 @@ describe Invoca::Metrics::Client do
       expect(metrics_client.namespace).to eq(namespace)
     end
 
-    it "properly construct with defaults such that statsd are enabled" do
+    it "properly constructs with defaults such that statsd are enabled" do
       metrics_client = Invoca::Metrics::Client.metrics
       expect(metrics_client.hostname).to eq(Invoca::Metrics::Client::STATSD_DEFAULT_HOSTNAME)
       expect(metrics_client.port).to eq(Invoca::Metrics::Client::STATSD_DEFAULT_PORT)
       expect(metrics_client.namespace).to eq("unicorn")
     end
 
-    it "properly construct with configured statsd connection information" do
+    it "properly constructs with configured statsd connection information" do
       Invoca::Metrics.statsd_host = "127.0.0.10"
       Invoca::Metrics.statsd_port = 1234
       metrics_client              = Invoca::Metrics::Client.metrics
@@ -63,7 +63,7 @@ describe Invoca::Metrics::Client do
       expect(metrics_client.port).to eq(1234)
     end
 
-    it "properly construct with configured statsd config for default_config_key" do
+    it "properly constructs with configured statsd config for default_config_key" do
       stub_metrics(
         server_name:        "prod-fe1",
         service_name:       "unicorn",
@@ -86,7 +86,7 @@ describe Invoca::Metrics::Client do
       expect(metrics_client.sub_server_name).to eq("sub_server_1")
     end
 
-    it "construct with given args along with default args" do
+    it "constructs with given args along with default args" do
       Invoca::Metrics.statsd_host = "127.0.0.10"
       Invoca::Metrics.statsd_port = 1234
       metrics_client              = Invoca::Metrics::Client.metrics(statsd_host: "127.0.0.255", statsd_port: 5678)
