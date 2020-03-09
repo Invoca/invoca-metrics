@@ -70,9 +70,13 @@ module Invoca
         end
 
         def metrics_for(config_key:, namespace: nil)
-          metrics_config = Invoca::Metrics.config[config_key] || {}
-          namespace_override = { namespace: namespace || @metrics_namespace }.compact
-          Client.metrics(Invoca::Metrics.default_client_config.merge(metrics_config).merge(namespace_override))
+          config_from_key      = Invoca::Metrics.config[config_key] || {}
+          metrics_config       = if (effective_namespace = namespace || @metrics_namespace)
+                                   config_from_key.merge(namespace: effective_namespace)
+                                 else
+                                   config_from_key
+                                 end
+          Client.metrics(Invoca::Metrics.default_client_config.merge(metrics_config))
         end
       end
 
