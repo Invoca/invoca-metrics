@@ -3,7 +3,7 @@
 require 'sourcify'
 
 describe Invoca::Metrics::GaugeCache do
-  let(:statsd) { double(Invoca::Metrics::StatsdWithPersistentConnection) }
+  let(:statsd_client) { double(Invoca::Metrics::Statsd) }
 
   describe 'class' do
     let(:cache) { double(described_class) }
@@ -21,7 +21,7 @@ describe Invoca::Metrics::GaugeCache do
     describe '#register' do
       it 'initializes a new GaugeCache object for the client' do
         expect(described_class).to receive(:new).and_return(cache)
-        expect(described_class.register(client.gauge_cache_key, statsd)).to eq(cache)
+        expect(described_class.register(client.gauge_cache_key, statsd_client)).to eq(cache)
       end
     end
   end
@@ -33,7 +33,7 @@ describe Invoca::Metrics::GaugeCache do
       expect_any_instance_of(described_class).to receive(:loop) { |&loop_block| loop_block.call }
       expect(Thread).to receive(:new) { |&thread_block| thread_block.call }
 
-      described_class.new(statsd)
+      described_class.new(statsd_client)
     end
   end
 
@@ -41,7 +41,7 @@ describe Invoca::Metrics::GaugeCache do
     let(:metric) { 'test.gauge.metric' }
     let(:value)  { 1 }
 
-    subject { described_class.new(statsd) }
+    subject { described_class.new(statsd_client) }
 
     before(:each) { allow(Thread).to receive(:new) }
 
@@ -84,16 +84,16 @@ describe Invoca::Metrics::GaugeCache do
         let(:gauges) { {} }
 
         it 'reports nothing' do
-          expect(statsd).to receive(:batch).and_yield(statsd)
-          expect(statsd).to_not receive(:gauge)
+          expect(statsd_client).to receive(:batch).and_yield(statsd_client)
+          expect(statsd_client).to_not receive(:gauge)
           subject.report
         end
       end
 
       describe 'with gauges currently set' do
         it 'reports all gauges currently set as gauges on the statsd instance' do
-          expect(statsd).to receive(:batch).and_yield(statsd)
-          gauges.each { |metric, value| expect(statsd).to receive(:gauge).with(metric, value) }
+          expect(statsd_client).to receive(:batch).and_yield(statsd_client)
+          gauges.each { |metric, value| expect(statsd_client).to receive(:gauge).with(metric, value) }
           subject.report
         end
       end
@@ -108,12 +108,12 @@ describe Invoca::Metrics::GaugeCache do
         end
 
         it 'omits reporting of falsey gauges' do
-          expect(statsd).to receive(:batch).and_yield(statsd)
+          expect(statsd_client).to receive(:batch).and_yield(statsd_client)
           gauges.each do |metric, value|
             if value.nil?
-              expect(statsd).to receive(:gauge).with(metric, value).never
+              expect(statsd_client).to receive(:gauge).with(metric, value).never
             else
-              expect(statsd).to receive(:gauge).with(metric, value)
+              expect(statsd_client).to receive(:gauge).with(metric, value)
             end
           end
           subject.report

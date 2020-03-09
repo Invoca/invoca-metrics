@@ -4,7 +4,7 @@ require 'statsd'
 
 module Invoca
   module Metrics
-    class StatsdWithPersistentConnection < ::Statsd
+    class Statsd < ::Statsd
       def send_to_socket(message)
         # self.class.logger&.debug { "Statsd: #{message}" }
         socket.send(message, 0)

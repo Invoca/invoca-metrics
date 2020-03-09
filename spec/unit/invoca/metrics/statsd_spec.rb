@@ -2,7 +2,7 @@
 
 require_relative '../../../spec_helper'
 
-describe Invoca::Metrics::StatsdWithPersistentConnection do
+describe Invoca::Metrics::Statsd do
   subject { described_class.new("127.0.0.1", 8125) }
 
   before(:each) { Thread.current.thread_variable_set(:statsd_socket, nil) }

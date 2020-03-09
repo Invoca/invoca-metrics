@@ -99,7 +99,7 @@ describe Invoca::Metrics::Client do
       Invoca::Metrics.statsd_port = 1234
 
       expected_cache_key = ["127.0.0.255", 5678, nil, "unicorn", "unicorn", "prod-fe1", nil]
-      expect(Invoca::Metrics::GaugeCache).to receive(:register).with(expected_cache_key, instance_of(Invoca::Metrics::StatsdWithPersistentConnection))
+      expect(Invoca::Metrics::GaugeCache).to receive(:register).with(expected_cache_key, instance_of(Invoca::Metrics::Statsd))
 
       Invoca::Metrics::Client.metrics(statsd_host: "127.0.0.255", statsd_port: 5678)
     end
