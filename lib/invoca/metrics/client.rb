@@ -56,7 +56,7 @@ module Invoca
         @server_label    = server_label
         @sub_server_name = sub_server_name
 
-        @statsd_client = Statsd.new(@hostname, @port)
+        @statsd_client = StatsdClient.new(@hostname, @port)
         @statsd_client.namespace = namespace || [@cluster_name, @service_name].compact.join(STATSD_METRICS_SEPARATOR).presence
 
         @gauge_cache = GaugeCache.register(gauge_cache_key, @statsd_client)

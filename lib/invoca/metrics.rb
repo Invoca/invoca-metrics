@@ -4,7 +4,7 @@ require 'active_support'
 require 'active_support/core_ext'
 
 require "invoca/metrics/version"
-require "invoca/metrics/statsd"
+require "invoca/metrics/statsd_client"
 require "invoca/metrics/client"
 require "invoca/metrics/direct_metric"
 require "invoca/metrics/batch"

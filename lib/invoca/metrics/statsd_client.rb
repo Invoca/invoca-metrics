@@ -4,7 +4,7 @@ require 'statsd'
 
 module Invoca
   module Metrics
-    class Statsd < ::Statsd
+    class StatsdClient < ::Statsd
       MILLISECONDS_IN_SECOND = 1000
 
       def time(stat, sample_rate = 1)

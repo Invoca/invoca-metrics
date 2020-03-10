@@ -3,7 +3,7 @@
 require 'sourcify'
 
 describe Invoca::Metrics::GaugeCache do
-  let(:statsd_client) { double(Invoca::Metrics::Statsd) }
+  let(:statsd_client) { double(Invoca::Metrics::StatsdClient) }
 
   describe 'class' do
     let(:cache) { double(described_class) }
