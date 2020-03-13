@@ -28,6 +28,5 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "activesupport", "~> 4.0"
-  spec.add_dependency "rails", "~> 4.0"
   spec.add_dependency "statsd-ruby", "~> 1.2.1"
 end
