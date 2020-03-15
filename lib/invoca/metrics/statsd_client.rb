@@ -16,7 +16,7 @@ module Invoca
       end
 
       def send_to_socket(message)
-        # self.class.logger&.debug { "Statsd: #{message}" }
+        self.class.logger&.debug { "Statsd: #{message}" }
         socket.send(message, 0)
       rescue => ex
         self.class.logger&.error { "Statsd exception sending: #{ex.class}: #{ex}" }
