@@ -5,8 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `metrics_namespace` decorator for setting the namespace for globally for a module or class that includes `Invoca::Metrics::Source`
+- `Invoca::Metrics::StatsdClient` for housing improvements to the `Statsd` class
+- Changelog based on formatting provided by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+
 ### Removed
 - Removed Rails as a dependency of Gem
+
+### Changed
+- Refactored `Invoca::Metrics::Client` to use composition instead of inheritance to avoid global mutation bugs
+
+### Fixed
+- A bug in namespace reassignment of the `Client` that was allowing global mutation of the metrics namespace
 
 ## [1.6.0] - 2020-03-02
 ### Added

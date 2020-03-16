@@ -7,7 +7,7 @@ describe Invoca::Metrics::Batch do
 
   before(:each) do
     stub_metrics_as_production_unicorn
-    metrics_client.extend(TrackSentMessage)
+    metrics_client.instance_variable_get(:@statsd_client).extend(TrackSentMessage)
   end
 
   it "batch multiple stats in one message" do
@@ -23,7 +23,7 @@ describe Invoca::Metrics::Batch do
       stats_batch.gauge("memory", 128000)
     end
 
-    stats_lines = metrics_client.sent_message.split("\n")
+    stats_lines = metrics_client.instance_variable_get(:@statsd_client).sent_message.split("\n")
     expect(stats_lines).to eq(expected)
     expect(metrics_client.gauge_cache.cache).to include("current_size.gauge.prod-fe1" => 9)
     expect(metrics_client.gauge_cache.cache).to include("memory.gauge.prod-fe1" => 128000)
@@ -47,7 +47,7 @@ describe Invoca::Metrics::Batch do
       stats_batch.gauge("memory", 128000)
     end
 
-    stats_lines = metrics_client.sent_messages.map { |msg| msg.split("\n") }
+    stats_lines = metrics_client.instance_variable_get(:@statsd_client).sent_messages.map { |msg| msg.split("\n") }
     expect(stats_lines).to eq(expected)
     expect(metrics_client.gauge_cache.cache).to include("current_size.gauge.prod-fe1" => 9)
     expect(metrics_client.gauge_cache.cache).to include("memory.gauge.prod-fe1" => 128000)
@@ -55,6 +55,6 @@ describe Invoca::Metrics::Batch do
 
   it "send nothing if batch is empty" do
     metrics_client.batch { }
-    expect(metrics_client.sent_message).to be_nil
+    expect(metrics_client.instance_variable_get(:@statsd_client).sent_message).to be_nil
   end
 end

@@ -6,8 +6,8 @@ module Invoca
       GAUGE_REPORT_INTERVAL = 60.seconds
 
       class << self
-        def register(client)
-          registered_gauge_caches[client.gauge_cache_key] ||= new(client)
+        def register(cache_key, statsd_client)
+          registered_gauge_caches[cache_key] ||= new(statsd_client)
         end
 
         def reset
@@ -23,8 +23,8 @@ module Invoca
 
       attr_reader :cache
 
-      def initialize(client)
-        @client = client
+      def initialize(statsd_client)
+        @statsd_client = statsd_client
         @cache = {}
         start_reporting_thread
       end
@@ -38,9 +38,9 @@ module Invoca
       # To avoid "RuntimeError: can't add a new key into hash during iteration" from occurring we are
       # temporarily duplicating the cache to iterate and send the batch of metrics
       def report
-        @client.batch do |stats_batch|
+        @statsd_client.batch do |statsd_batch|
           @cache.dup.each do |metric, value|
-            stats_batch.gauge_without_caching(metric, value) if value
+            statsd_batch.gauge(metric, value) if value
           end
         end
       end
