@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Invoca::Metrics::StatsdClient` for housing improvements to the `Statsd` class
 - Changelog based on formatting provided by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+### Removed
+- Removed Rails as a dependency of Gem
+
 ### Changed
 - Refactored `Invoca::Metrics::Client` to use composition instead of inheritance to avoid global mutation bugs
 
