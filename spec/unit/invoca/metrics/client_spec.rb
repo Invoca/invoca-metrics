@@ -106,15 +106,15 @@ describe Invoca::Metrics::Client do
   end
 
   describe "#logger" do
-    it "allows assignment of Statsd logger through Invoca::Metrics::Client" do
+    it "allows assignment of StatsdClient logger through Invoca::Metrics::Client" do
       logger = Logger.new(STDOUT)
       expect(described_class.logger).to_not be(logger)
-      expect(described_class.logger).to be(::Statsd.logger)
+      expect(described_class.logger).to be(Invoca::Metrics::StatsdClient.logger)
 
       described_class.logger = logger
 
       expect(described_class.logger).to be(logger)
-      expect(::Statsd.logger).to be(logger)
+      expect(Invoca::Metrics::StatsdClient.logger).to be(logger)
     end
   end
 
