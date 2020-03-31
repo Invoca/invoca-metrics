@@ -11,7 +11,7 @@ module Invoca
       STATSD_METRICS_SEPARATOR = '.'
 
       class << self
-        delegate :logger, :logger=, to: StatsdClient
+        delegate :logger, :logger=, :log_send_failures, :log_send_failures=, to: StatsdClient
 
         # Default values are required for backwards compatibility
         def metrics(statsd_host:     Invoca::Metrics.default_client_config[:statsd_host],

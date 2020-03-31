@@ -118,6 +118,17 @@ describe Invoca::Metrics::Client do
     end
   end
 
+  describe "#log_send_failures" do
+    it "allows accessing log_send_failures through Invoca::Metrics::Client" do
+      described_class.log_send_failures = false
+      expect(described_class.log_send_failures).to eq(false)
+      expect(Invoca::Metrics::StatsdClient.log_send_failures).to eq(false)
+      described_class.log_send_failures = true
+      expect(described_class.log_send_failures).to eq(true)
+      expect(Invoca::Metrics::StatsdClient.log_send_failures).to eq(true)
+    end
+  end
+
   describe "#server_name" do
     it "return server_label for backwards compatibility" do
       stub_metrics_as_production_unicorn
