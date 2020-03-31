@@ -7,6 +7,16 @@ module Invoca
     class StatsdClient < ::Statsd
       MILLISECONDS_IN_SECOND = 1000
 
+      @log_send_failures = true
+
+      class << self
+        attr_accessor :log_send_failures
+      end
+
+      def initialize(host, port)
+        super(host, port)
+      end
+
       def time(stat, sample_rate = 1)
         start = Time.now
         result = yield
@@ -19,7 +29,10 @@ module Invoca
         self.class.logger&.debug { "Statsd: #{message}" }
         socket.send(message, 0)
       rescue => ex
-        self.class.logger&.error { "Statsd exception sending: #{ex.class}: #{ex}" }
+        if self.class.log_send_failures
+          self.class.logger&.error { "Statsd exception sending: #{ex.class}: #{ex}" }
+        end
+
         nil
       end
 
