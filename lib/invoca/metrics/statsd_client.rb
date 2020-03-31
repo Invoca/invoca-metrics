@@ -13,10 +13,6 @@ module Invoca
         attr_accessor :log_send_failures
       end
 
-      def initialize(host, port)
-        super(host, port)
-      end
-
       def time(stat, sample_rate = 1)
         start = Time.now
         result = yield
