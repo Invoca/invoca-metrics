@@ -31,6 +31,9 @@ Add the following code to your application...
     Invoca::Metrics.statsd_host     = "255.0.0.123"
     Invoca::Metrics.statsd_port     = 200
 
+    Invoca::Metrics::Client.logger = logger
+    Invoca::Metrics::Client.log_send_failures = ['staging', 'production'].include(environment)
+
 Out of the settings above, only `service_name` is required.  The others are optional.
 
 ### Multi Configuration
@@ -89,10 +92,6 @@ You can also request a specific configuration by calling `metrics_for(config_key
     metrics_for(config_key: :region).count("region_upload.success")
 
 Additional examples of using the gem can be found in the file: test/integration/metrics_gem_tester.rb
-
-## TODO
-
-* it would be really nice to remove the dependency on the activesupport gem
 
 ## Contributing
 
