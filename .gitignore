@@ -16,3 +16,4 @@ test/version_tmp
 tmp
 .idea
 .rubocop-http*
+gemfiles/*.lock

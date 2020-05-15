@@ -2,6 +2,10 @@
 
 Metrics generation for your apps!
 
+## Dependencies
+* Ruby >= 2.6
+* ActiveSupport >= 4.2, < 7
+
 ## Installation
 
 Add this line to your application's Gemfile:
