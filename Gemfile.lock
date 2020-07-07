@@ -1,8 +1,9 @@
 PATH
   remote: .
   specs:
-    invoca-metrics (1.8.0)
+    invoca-metrics (1.9.0)
       activesupport (>= 4.2, < 7)
+      prometheus_exporter (~> 0.5)
       statsd-ruby (~> 1.2.1)
 
 GEM
@@ -27,6 +28,7 @@ GEM
       concurrent-ruby (~> 1.0)
     method_source (1.0.0)
     minitest (5.14.1)
+    prometheus_exporter (0.5.2)
     pry (0.13.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
