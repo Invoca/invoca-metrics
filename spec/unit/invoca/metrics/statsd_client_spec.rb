@@ -46,6 +46,12 @@ describe Invoca::Metrics::StatsdClient do
     let(:logger) { Logger.new(log_stream) }
     before(:each) { Invoca::Metrics::StatsdClient.logger = logger }
 
+    it "logs client connection info" do
+      expect(subject).to be_truthy
+      log_messages = log_stream.string.split("\n")
+      expect(log_messages[0]).to match(/Statsd client connection info -- \[hostname:.+port:.+\]\z/)
+    end
+
     context "with log_send_failures = true" do
       before { Invoca::Metrics::StatsdClient.log_send_failures = true }
 
@@ -55,8 +61,9 @@ describe Invoca::Metrics::StatsdClient do
           expect(subject.send(:socket)).to receive(:send).with(message, 0) { raise "!!!" }
           subject.send_to_socket(message)
           log_messages = log_stream.string.split("\n")
-          expect(log_messages[0]).to match(/Statsd: ABC\z/)
-          expect(log_messages[1]).to match(/Statsd exception sending: RuntimeError: !!!\z/)
+          expect(log_messages[0]).to match(/Statsd client connection info/)
+          expect(log_messages[1]).to match(/Statsd: ABC\z/)
+          expect(log_messages[2]).to match(/Statsd exception sending: RuntimeError: !!!\z/)
         end
       end
     end
@@ -70,8 +77,9 @@ describe Invoca::Metrics::StatsdClient do
           expect(subject.send(:socket)).to receive(:send).with(message, 0) { raise "!!!" }
           subject.send_to_socket(message)
           log_messages = log_stream.string.split("\n")
-          expect(log_messages[0]).to match(/Statsd: ABC\z/)
-          expect(log_messages[1]).to eq(nil)
+          expect(log_messages[0]).to match(/Statsd client connection info/)
+          expect(log_messages[1]).to match(/Statsd: ABC\z/)
+          expect(log_messages[2]).to eq(nil)
         end
       end
     end

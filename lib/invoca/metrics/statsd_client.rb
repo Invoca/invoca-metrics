@@ -13,6 +13,11 @@ module Invoca
         attr_accessor :log_send_failures
       end
 
+      def initialize(hostname, port)
+        self.class.logger&.debug { "Statsd client connection info -- [hostname: #{hostname}, port: #{port}]" }
+        super(hostname, port)
+      end
+
       def time(stat, sample_rate = 1)
         start = Time.now
         result = yield
