@@ -14,7 +14,7 @@ module Invoca
       end
 
       def initialize(hostname, port)
-        self.class.logger&.debug { "Statsd client connection info -- [hostname: #{hostname}, port: #{port}]" }
+        self.class.logger&.info { "Statsd client connection info -- [hostname: #{hostname}, port: #{port}]" }
         super(hostname, port)
       end
 
