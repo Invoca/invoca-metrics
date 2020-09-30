@@ -31,6 +31,8 @@ module Invoca
             namespace:       namespace
           }.freeze
 
+          self.class.logger&.info { "The metrics config is: #{config.inspect}" }
+
           client_cache[config] ||= new(config)
         end
 
