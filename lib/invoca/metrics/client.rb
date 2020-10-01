@@ -32,7 +32,10 @@ module Invoca
             namespace:       namespace
           }.freeze
 
-          Logger.new(STDOUT).info { "The metrics config is: #{config.inspect}" }
+          logger = Logger.new(STDOUT)
+          logger.info { "1 - The metrics config is: #{config.inspect}" }
+          logger.info { "2 - The client cache is: #{client_cache.inspect}" }
+          logger.info { "3 - The cached config is: #{client_cache[config].inspect}" }
 
           client_cache[config] ||= new(config)
         end
