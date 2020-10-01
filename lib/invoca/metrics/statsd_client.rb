@@ -41,6 +41,7 @@ module Invoca
       end
 
       def new_socket
+        self.class.logger&.info { "Statsd client connection info -- [hostname: #{@host}, port: #{@port}]" }
         UDPSocket.new.tap { |udp| udp.connect(@host, @port) }
       end
     end
