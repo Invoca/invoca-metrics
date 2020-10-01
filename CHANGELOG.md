@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.8.1] - Unreleased
 ### Added
-- `Invoca::Metrics::StatsdClient` logs the hostname and port on startup
+- `Invoca::Metrics::StatsdClient` logs the hostname and port when a new socket is created.
 
 ## [1.8.0] - 2020-05-15
 ### Added
