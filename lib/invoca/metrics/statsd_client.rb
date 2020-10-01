@@ -13,11 +13,6 @@ module Invoca
         attr_accessor :log_send_failures
       end
 
-      def initialize(hostname, port)
-        self.class.logger&.info { "Statsd client connection info -- [hostname: #{hostname}, port: #{port}]" }
-        super(hostname, port)
-      end
-
       def time(stat, sample_rate = 1)
         start = Time.now
         result = yield
@@ -46,6 +41,7 @@ module Invoca
       end
 
       def new_socket
+        self.class.logger&.info { "Statsd client connection info -- [hostname: #{@host}, port: #{@port}]" }
         UDPSocket.new.tap { |udp| udp.connect(@host, @port) }
       end
     end
