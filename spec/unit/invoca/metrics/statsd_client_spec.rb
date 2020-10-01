@@ -46,12 +46,6 @@ describe Invoca::Metrics::StatsdClient do
     let(:logger) { Logger.new(log_stream) }
     before(:each) { Invoca::Metrics::StatsdClient.logger = logger }
 
-    it "logs client connection info" do
-      expect(subject).to be_truthy
-      log_messages = log_stream.string.split("\n")
-      expect(log_messages[0]).to match(/Statsd client connection info -- \[hostname:.+port:.+\]\z/)
-    end
-
     context "with log_send_failures = true" do
       before { Invoca::Metrics::StatsdClient.log_send_failures = true }
 
