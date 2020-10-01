@@ -2,7 +2,6 @@
 
 require 'active_support'
 require 'active_support/core_ext/module/delegation'
-require 'logger'
 
 module Invoca
   module Metrics
@@ -31,11 +30,6 @@ module Invoca
             sub_server_name: sub_server_name,
             namespace:       namespace
           }.freeze
-
-          logger = Logger.new(STDOUT)
-          logger.info { "1 - The metrics config is: #{config.inspect}" }
-          logger.info { "2 - The client cache is: #{client_cache.inspect}" }
-          logger.info { "3 - The cached config is: #{client_cache[config].inspect}" }
 
           client_cache[config] ||= new(config)
         end
