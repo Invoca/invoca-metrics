@@ -2,6 +2,6 @@
 
 module Invoca
   module Metrics
-    VERSION = "1.8.1.pre.2"
+    VERSION = "1.8.1.pre.3"
   end
 end
