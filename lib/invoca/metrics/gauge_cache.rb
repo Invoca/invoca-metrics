@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'active_support'
+require 'active_support/core_ext'
+
 module Invoca
   module Metrics
     class GaugeCache
@@ -49,11 +52,17 @@ module Invoca
 
       def start_reporting_thread
         Thread.new do
-          next_time = Time.now.to_i
-          loop do
-            next_time = (((next_time + GAUGE_REPORT_INTERVAL + 1) / GAUGE_REPORT_INTERVAL) * GAUGE_REPORT_INTERVAL) - 1
-            report
-            sleep([next_time - Time.now.to_i, 0].max)
+          reporting_loop
+        end
+      end
+
+      def reporting_loop
+        next_time = Time.now.to_i
+        loop do
+          next_time = (((next_time + GAUGE_REPORT_INTERVAL + 1) / GAUGE_REPORT_INTERVAL) * GAUGE_REPORT_INTERVAL) - 1
+          report
+          if (delay = next_time - Time.now.to_i) > 0
+            sleep(delay)
           end
         end
       end

@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+require 'invoca/metrics'
+require 'invoca/metrics/gauge_cache'
 require 'sourcify'
 
 describe Invoca::Metrics::GaugeCache do
+  let(:reporting_period) { 60.0 }
   let(:statsd_client) { double(Invoca::Metrics::StatsdClient) }
 
   describe 'class' do
@@ -119,6 +122,44 @@ describe Invoca::Metrics::GaugeCache do
           subject.report
         end
       end
+    end
+  end
+
+  describe 'publish loop' do
+    subject { described_class.new(statsd_client) } 
+    
+    before do
+      expect(Time).to receive(:now).and_return(0.0)
+      expect_any_instance_of(described_class).to receive(:start_reporting_thread)
+      expect(subject).to receive(:report)
+      expect(subject).to receive(:report).and_raise(ScriptError, "Done")
+    end
+
+    it 'sleeps the remainder of the publish period' do
+      expect(Time).to receive(:now).and_return(3.2)
+
+      expect(subject).to receive(:sleep).with((reporting_period - 3.2).to_i)
+      expect do
+        subject.send(:reporting_loop)
+      end.to raise_exception(ScriptError, "Done")
+    end
+
+    it 'does not sleep a negative amount' do
+      expect(Time).to receive(:now).and_return(60.2)
+
+      expect(subject).to_not receive(:sleep)
+      expect do
+        subject.send(:reporting_loop)
+      end.to raise_exception(ScriptError, "Done")
+    end
+
+    it 'does not sleep for zero' do 
+      expect(Time).to receive(:now).and_return(59.9)
+
+      expect(subject).to_not receive(:sleep)
+      expect do
+        subject.send(:reporting_loop)
+      end.to raise_exception(ScriptError, "Done")
     end
   end
 end
