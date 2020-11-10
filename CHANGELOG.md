@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.2] - 2020-11-09
+### Added
+- Bug Fix `Invoca::Metrics::GaugeCache.start_reporting_thread` no longer calls sleep 0 and now has an intermediate rescue on Exception for a reporting thread. 
+
 ## [1.8.1] - 2020-10-01
 ### Added
 - `Invoca::Metrics::StatsdClient` logs the hostname and port when a new socket is created.
@@ -48,6 +52,7 @@ Initial release
 <!-- TODO: Backfill the contents of the initial release -->
 
 
+[1.8.2]: https://github.com/Invoca/invoca-metrics/compare/v1.8.1...v1.8.2
 [1.8.1]: https://github.com/Invoca/invoca-metrics/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/Invoca/invoca-metrics/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/Invoca/invoca-metrics/compare/v1.6.2...v1.7.0
