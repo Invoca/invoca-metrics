@@ -133,7 +133,7 @@ describe Invoca::Metrics::GaugeCache do
       Invoca::Metrics::Client.logger = logger
       expect_any_instance_of(described_class).to receive(:start_reporting_thread)
     end
-    
+
     after do
       Invoca::Metrics::Client.logger = nil
     end
@@ -146,10 +146,9 @@ describe Invoca::Metrics::GaugeCache do
       subject.send(:reporting_loop_with_rescue)
     end
   end
-  
 
   describe '#reporting_loop' do
-    subject { described_class.new(statsd_client) } 
+    subject { described_class.new(statsd_client) }
 
     before do
       expect(Time).to receive(:now).and_return(0.0)
@@ -176,7 +175,7 @@ describe Invoca::Metrics::GaugeCache do
       end.to raise_exception(ScriptError, "Done")
     end
 
-    it 'does not sleep for zero' do 
+    it 'does not sleep for zero' do
       expect(Time).to receive(:now).and_return(59.9)
 
       expect(subject).to_not receive(:sleep)
