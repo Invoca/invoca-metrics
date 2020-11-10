@@ -125,9 +125,32 @@ describe Invoca::Metrics::GaugeCache do
     end
   end
 
-  describe 'publish loop' do
-    subject { described_class.new(statsd_client) } 
+  describe '#reporting_loop_with_rescue' do
+    subject { described_class.new(statsd_client) }
+    let(:logger) { instance_double(::Logger, "logger") }
+
+    before do
+      Invoca::Metrics::Client.logger = logger
+      expect_any_instance_of(described_class).to receive(:start_reporting_thread)
+    end
     
+    after do
+      Invoca::Metrics::Client.logger = nil
+    end
+
+    it 'rescues and logs exceptions' do
+      expect(subject).to receive(:reporting_loop).and_raise(ScriptError, "error!")
+      allow(logger).to receive(:error).with("GaugeCache#reporting_loop_with_rescue rescued exception:\nScriptError: error!")
+      allow(statsd_client).to receive(:batch)
+
+      subject.send(:reporting_loop_with_rescue)
+    end
+  end
+  
+
+  describe '#reporting_loop' do
+    subject { described_class.new(statsd_client) } 
+
     before do
       expect(Time).to receive(:now).and_return(0.0)
       expect_any_instance_of(described_class).to receive(:start_reporting_thread)

@@ -52,8 +52,14 @@ module Invoca
 
       def start_reporting_thread
         Thread.new do
-          reporting_loop
+          reporting_loop_with_rescue
         end
+      end
+
+      def reporting_loop_with_rescue
+        reporting_loop
+      rescue Exception => ex
+        Invoca::Metrics::Client.logger.error("GaugeCache#reporting_loop_with_rescue rescued exception:\n#{ex.class}: #{ex.message}")
       end
 
       def reporting_loop
