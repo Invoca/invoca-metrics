@@ -49,11 +49,25 @@ module Invoca
 
       def start_reporting_thread
         Thread.new do
-          next_time = Time.now.to_i
-          loop do
-            next_time = (((next_time + GAUGE_REPORT_INTERVAL + 1) / GAUGE_REPORT_INTERVAL) * GAUGE_REPORT_INTERVAL) - 1
-            report
-            sleep([next_time - Time.now.to_i, 0].max)
+          reporting_loop_with_rescue
+        end
+      end
+
+      def reporting_loop_with_rescue
+        reporting_loop
+      rescue Exception => ex
+        Invoca::Metrics::Client.logger.error("GaugeCache#reporting_loop_with_rescue rescued exception:\n#{ex.class}: #{ex.message}")
+      end
+
+      def reporting_loop
+        next_time = Time.now.to_i
+        loop do
+          next_time = (((next_time + GAUGE_REPORT_INTERVAL + 1) / GAUGE_REPORT_INTERVAL) * GAUGE_REPORT_INTERVAL) - 1
+          report
+          if (delay = next_time - Time.now.to_i) > 0
+            sleep(delay)
+          else
+            warn("Window to report gauge may have been missed.")
           end
         end
       end
