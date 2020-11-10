@@ -69,6 +69,8 @@ module Invoca
           report
           if (delay = next_time - Time.now.to_i) > 0
             sleep(delay)
+          else
+            warn("Window to report gauge may have been missed.")
           end
         end
       end
