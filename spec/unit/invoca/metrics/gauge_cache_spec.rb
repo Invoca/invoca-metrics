@@ -154,34 +154,28 @@ describe Invoca::Metrics::GaugeCache do
       expect(Time).to receive(:now).and_return(0.0)
       expect_any_instance_of(described_class).to receive(:start_reporting_thread)
       expect(subject).to receive(:report)
-      expect(subject).to receive(:report).and_raise(ScriptError, "Done")
+      expect(subject).to receive(:report) { throw :Done } # to break out of loop
     end
 
     it 'sleeps the remainder of the publish period' do
       expect(Time).to receive(:now).and_return(3.2)
 
       expect(subject).to receive(:sleep).with((reporting_period - 3.2).to_i)
-      expect do
-        subject.send(:reporting_loop)
-      end.to raise_exception(ScriptError, "Done")
+      catch(:Done) { subject.send(:reporting_loop) }
     end
 
     it 'does not sleep a negative amount' do
       expect(Time).to receive(:now).and_return(60.2)
 
       expect(subject).to_not receive(:sleep)
-      expect do
-        subject.send(:reporting_loop)
-      end.to raise_exception(ScriptError, "Done")
+      catch(:Done) { subject.send(:reporting_loop) }
     end
 
     it 'does not sleep for zero' do
       expect(Time).to receive(:now).and_return(59.9)
 
       expect(subject).to_not receive(:sleep)
-      expect do
-        subject.send(:reporting_loop)
-      end.to raise_exception(ScriptError, "Done")
+      catch(:Done) { subject.send(:reporting_loop) }
     end
   end
 end
