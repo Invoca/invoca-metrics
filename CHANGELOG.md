@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.8.2] - 2020-11-09
 ### Fixed
-- Bug Fix `Invoca::Metrics::GaugeCache.start_reporting_thread` no longer calls sleep 0 and now has an intermediate rescue on Exception for a reporting thread. 
+- Fixed bug in `Invoca::Metrics::GaugeCache.start_reporting_thread` where sleep 0 was causing thread to sleep forever.   
 
 ## [1.8.1] - 2020-10-01
 ### Added
