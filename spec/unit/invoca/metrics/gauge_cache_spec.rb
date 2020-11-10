@@ -5,7 +5,6 @@ require 'invoca/metrics/gauge_cache'
 require 'sourcify'
 
 describe Invoca::Metrics::GaugeCache do
-  let(:reporting_period) { 60.0 }
   let(:statsd_client) { double(Invoca::Metrics::StatsdClient) }
 
   describe 'class' do
@@ -149,6 +148,7 @@ describe Invoca::Metrics::GaugeCache do
 
   describe '#reporting_loop' do
     subject { described_class.new(statsd_client) }
+    let(:reporting_period) { 60.0 }
 
     before do
       expect(Time).to receive(:now).and_return(0.0)
