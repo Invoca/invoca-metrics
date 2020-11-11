@@ -6,6 +6,7 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'appraisal'
+gem 'invoca-env',                '~> 0.6'
 gem 'pry'
 gem 'rake'
 gem 'rspec'

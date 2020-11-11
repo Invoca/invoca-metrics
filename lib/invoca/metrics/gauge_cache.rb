@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'invoca/env'
+
 module Invoca
   module Metrics
     class GaugeCache
@@ -67,7 +69,7 @@ module Invoca
           if (delay = next_time - Time.now.to_i) > 0
             sleep(delay)
           else
-            warn("Window to report gauge may have been missed.")
+            warn("Window to report gauge may have been missed.") unless Invoca::Env.service_environment == 'test'
           end
         end
       end
