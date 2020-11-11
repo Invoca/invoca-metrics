@@ -25,6 +25,8 @@ GEM
       tins (~> 1.0)
     i18n (1.8.5)
       concurrent-ruby (~> 1.0)
+    invoca-env (0.6.0)
+      activesupport (>= 4.0, < 7)
     method_source (1.0.0)
     minitest (5.14.2)
     pry (0.13.1)
@@ -73,6 +75,7 @@ PLATFORMS
 
 DEPENDENCIES
   appraisal
+  invoca-env (~> 0.6)
   invoca-metrics!
   pry
   rake
