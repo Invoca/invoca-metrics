@@ -179,5 +179,14 @@ describe Invoca::Metrics::GaugeCache do
       expect(subject).to receive(:warn).with("Window to report gauge may have been missed.")
       catch(:Done) { subject.send(:reporting_loop) }
     end
+
+    it 'does not warn for service_environment is test' do
+      expect(Time).to receive(:now).and_return(60.2)
+
+      expect(subject).to_not receive(:sleep)
+      expect(subject).to receive(:service_environment).and_return("test")
+      expect(subject).to_not receive(:warn).with("Window to report gauge may have been missed.")
+      catch(:Done) { subject.send(:reporting_loop) }
+    end
   end
 end
