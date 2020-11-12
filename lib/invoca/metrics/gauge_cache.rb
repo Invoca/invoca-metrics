@@ -45,6 +45,10 @@ module Invoca
         end
       end
 
+      def service_environment
+        (ENV['RAILS_ENV'].presence || ENV['SERVICE_ENV'].presence || 'development')
+      end
+
       private
 
       def start_reporting_thread
@@ -67,7 +71,7 @@ module Invoca
           if (delay = next_time - Time.now.to_i) > 0
             sleep(delay)
           else
-            warn("Window to report gauge may have been missed.")
+            warn("Window to report gauge may have been missed.") unless service_environment == 'test'
           end
         end
       end
