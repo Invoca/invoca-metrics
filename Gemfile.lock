@@ -1,14 +1,14 @@
 PATH
   remote: .
   specs:
-    invoca-metrics (1.8.2)
+    invoca-metrics (1.8.3)
       activesupport (>= 4.2, < 7)
       statsd-ruby (~> 1.2.1)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (6.0.3.3)
+    activesupport (6.0.3.4)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
@@ -64,9 +64,9 @@ GEM
     thread_safe (0.3.6)
     tins (1.24.1)
       sync
-    tzinfo (1.2.7)
+    tzinfo (1.2.8)
       thread_safe (~> 0.1)
-    zeitwerk (2.4.0)
+    zeitwerk (2.4.1)
 
 PLATFORMS
   ruby
