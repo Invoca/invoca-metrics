@@ -46,7 +46,7 @@ module Invoca
       end
 
       def service_environment
-        (ENV['RAILS_ENV'].presence || ENV['SERVICE_ENV'].presence || 'development')
+        @service_environment ||= ENV['RAILS_ENV'].presence || ENV['SERVICE_ENV'].presence || 'development'
       end
 
       private
