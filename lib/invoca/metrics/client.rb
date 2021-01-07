@@ -89,7 +89,7 @@ module Invoca
 
       def count(name, value = 1)
         if (args = normalized_metric_name_and_value(name, value, "counter"))
-          statsd_client.to_h.count(*args)
+          statsd_client.count(*args)
         end
       end
 
