@@ -31,7 +31,7 @@ module Invoca
             namespace:       namespace
           }.freeze
 
-          client_cache[config] ||= new(config)
+          client_cache[config] ||= new(**config)
         end
 
         def reset_cache

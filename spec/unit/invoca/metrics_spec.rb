@@ -62,13 +62,13 @@ describe Invoca::Metrics do
     end
 
     it "return default config values when no default_config_key is set" do
-      stub_metrics(@default_values)
+      stub_metrics(**@default_values)
       expect(Invoca::Metrics.default_config_key).to be_nil
       expect(Invoca::Metrics.default_client_config).to eq(@default_values)
     end
 
     it "return class default values merged with default_config_key config" do
-      stub_metrics(@default_values)
+      stub_metrics(**@default_values)
       Invoca::Metrics.config = {
         deployment_group: {
           server_name: "primary",
