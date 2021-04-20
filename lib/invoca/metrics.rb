@@ -76,7 +76,7 @@ module Invoca
                                  else
                                    config_from_key
                                  end
-          Client.metrics(Invoca::Metrics.default_client_config.merge(metrics_config))
+          Client.metrics(**Invoca::Metrics.default_client_config.merge(metrics_config))
         end
       end
 
