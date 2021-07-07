@@ -7,6 +7,7 @@ describe Invoca::Metrics::Batch do
 
   before(:each) do
     stub_metrics_as_production_unicorn
+    allow_any_instance_of(Invoca::Metrics::GaugeCache).to receive(:start_reporting_thread).and_return(nil)
     metrics_client.instance_variable_get(:@statsd_client).extend(TrackSentMessage)
   end
 
