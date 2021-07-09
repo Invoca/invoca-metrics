@@ -7,7 +7,7 @@ module TrackSentMessage
 
   def sent_message
     if defined?(@sent_messages) && @sent_messages
-      @sent_messages.size <= 1 or raise "#{@sent_messages.size} sent_messages!"
+      @sent_messages.size <= 1 or raise "#{@sent_messages.size} sent_messages! #{sent_messages.inspect}"
       @sent_messages.first
     end
   end
